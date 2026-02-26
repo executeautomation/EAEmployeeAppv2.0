@@ -1,0 +1,136 @@
+@{
+    ViewData["Title"] = "About";
+}
+
+<style>
+    .about-hero {
+        background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+        border-radius: 16px; padding: 3rem 2rem; text-align: center; margin-bottom: 2.5rem; color: #fff;
+    }
+    .about-hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: .75rem; }
+    .about-hero p { font-size: 1.05rem; color: rgba(255,255,255,.75); max-width: 640px; margin: 0 auto; }
+    .section-title { font-size: 1.3rem; font-weight: 700; color: #1a1a2e; margin-bottom: 1.25rem; }
+    .section-title span { border-bottom: 3px solid #28a745; padding-bottom: 3px; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+    .stat-card {
+        background: #fff; border-radius: 14px; padding: 1.5rem 1rem; text-align: center;
+        box-shadow: 0 4px 16px rgba(0,0,0,.07); border: 1px solid #eee;
+    }
+    .stat-card .s-num { font-size: 1.8rem; font-weight: 800; color: #0f3460; }
+    .stat-card .s-lbl { font-size: .8rem; color: #6c757d; font-weight: 600; margin-top: .2rem; text-transform: uppercase; letter-spacing: .04em; }
+
+    .values-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+    .value-card {
+        background: #fff; border-radius: 14px; padding: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,.07); border: 1px solid #eee;
+    }
+    .value-card .v-icon { font-size: 2rem; margin-bottom: .6rem; }
+    .value-card h4 { font-size: 1rem; font-weight: 700; color: #1a1a2e; margin-bottom: .4rem; }
+    .value-card p  { font-size: .85rem; color: #6c757d; margin: 0; }
+
+    .author-card {
+        background: #fff; border-radius: 16px; padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,.09); border: 1px solid #eee;
+        display: flex; align-items: flex-start; gap: 2rem; flex-wrap: wrap;
+        margin-bottom: 2.5rem;
+    }
+    .author-card img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 3px solid #28a745; flex-shrink: 0; }
+    .author-card h3 { font-size: 1.3rem; font-weight: 800; color: #1a1a2e; margin-bottom: .2rem; }
+    .author-card .role { font-size: .88rem; color: #28a745; font-weight: 600; margin-bottom: .75rem; }
+    .author-card p  { font-size: .92rem; color: #555; margin-bottom: 1rem; }
+    .author-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .author-stats .as { text-align: center; }
+    .author-stats .as-num { font-size: 1.3rem; font-weight: 800; color: #0f3460; }
+    .author-stats .as-lbl { font-size: .75rem; color: #6c757d; }
+    .social-links { display: flex; gap: .75rem; margin-top: .75rem; }
+    .social-links a {
+        display: inline-flex; align-items: center; gap: .35rem;
+        font-size: .83rem; font-weight: 600; text-decoration: none;
+        background: #f0f0f0; border-radius: 8px; padding: .35rem .85rem;
+        color: #333; transition: background .15s;
+    }
+    .social-links a:hover { background: #e2e2e2; }
+
+    .cta-section {
+        background: linear-gradient(135deg, #1a6b3c, #28a745);
+        border-radius: 16px; padding: 2.5rem 2rem; text-align: center; color: #fff;
+    }
+    .cta-section h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: .75rem; }
+    .cta-section p  { color: rgba(255,255,255,.8); margin-bottom: 1.5rem; font-size: 1rem; }
+    .cta-btn {
+        display: inline-block; background: #fff; color: #1a6b3c;
+        font-weight: 700; font-size: .95rem; padding: .75rem 2rem;
+        border-radius: 10px; text-decoration: none; margin: .3rem;
+        transition: transform .1s, box-shadow .15s;
+    }
+    .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.2); color: #1a6b3c; }
+    .cta-btn.outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.7); }
+    .cta-btn.outline:hover { background: rgba(255,255,255,.15); color: #fff; }
+    .coupon-pill {
+        display: inline-block; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4);
+        border-radius: 20px; padding: .3rem 1rem; font-size: .85rem; font-weight: 700;
+        letter-spacing: .04em; margin-bottom: 1.25rem; color: #fff;
+    }
+</style>
+
+<div class="about-hero">
+    <h1>&#127891; About ExecuteAutomation</h1>
+    <p>Pioneering the future of software testing through AI &amp; GenAI technologies. Empowering QA professionals across 198 countries.</p>
+</div>
+
+<div class="section-title"><span>&#128200; Our Impact</span></div>
+<div class="stats-grid">
+    <div class="stat-card"><div class="s-num">370K+</div><div class="s-lbl">Students Worldwide</div></div>
+    <div class="stat-card"><div class="s-num">40+</div><div class="s-lbl">Total Courses</div></div>
+    <div class="stat-card"><div class="s-num">5</div><div class="s-lbl">AI Testing Courses</div></div>
+    <div class="stat-card"><div class="s-num">20+</div><div class="s-lbl">Years Experience</div></div>
+    <div class="stat-card"><div class="s-num">198</div><div class="s-lbl">Countries Reached</div></div>
+</div>
+
+<div class="section-title"><span>&#127775; Our Mission</span></div>
+<div style="background:#fff;border-radius:14px;padding:1.75rem;box-shadow:0 4px 16px rgba(0,0,0,.07);border:1px solid #eee;margin-bottom:2.5rem;">
+    <p style="font-size:1rem;color:#444;margin:0;line-height:1.75">
+        At <strong>ExecuteAutomation</strong>, we specialise in <strong>AI and Generative AI testing education</strong>.
+        Our mission is to empower QA professionals and testers with the advanced AI skills needed to excel in the
+        rapidly evolving landscape of software testing and quality assurance.
+        Whether you're a seasoned QA professional or new to testing, we provide comprehensive training in
+        AI testing frameworks, multi-agent systems, LangChain, RAG implementations, and cutting-edge GenAI testing methodologies.
+    </p>
+</div>
+
+<div class="section-title"><span>&#10024; Our Values</span></div>
+<div class="values-grid">
+    <div class="value-card"><div class="v-icon">&#127941;</div><h4>Excellence</h4><p>We strive for excellence in everything we do, from course content to student support.</p></div>
+    <div class="value-card"><div class="v-icon">&#129309;</div><h4>Community</h4><p>We believe in building a strong learning community where students support each other.</p></div>
+    <div class="value-card"><div class="v-icon">&#128269;</div><h4>Quality</h4><p>All our courses are carefully crafted by industry experts with real-world experience.</p></div>
+    <div class="value-card"><div class="v-icon">&#128293;</div><h4>Passion</h4><p>We are passionate about education and helping people achieve their learning goals.</p></div>
+</div>
+
+<div class="section-title"><span>&#128100; Meet Our Author</span></div>
+<div class="author-card">
+    <img src="https://executeautomation.com/images/karthik-profile.jpg" alt="Karthik KK" />
+    <div>
+        <h3>Karthik KK</h3>
+        <div class="role">Founder &amp; AI Testing Expert</div>
+        <p>20+ years in test automation and AI. Creator of multiple Udemy courses on AI testing and GenAI. Passionate about empowering QA professionals with cutting-edge AI testing skills.</p>
+        <div class="author-stats">
+            <div class="as"><div class="as-num">370K+</div><div class="as-lbl">Students Taught</div></div>
+            <div class="as"><div class="as-num">40+</div><div class="as-lbl">Courses Created</div></div>
+            <div class="as"><div class="as-num">20+</div><div class="as-lbl">Years Experience</div></div>
+        </div>
+        <div class="social-links">
+            <a href="https://www.linkedin.com/in/karthikkk/" target="_blank">&#128101; LinkedIn</a>
+            <a href="http://youtube.com/executeautomation" target="_blank">&#128249; YouTube</a>
+            <a href="http://x.com/executeauto" target="_blank">&#120143; Twitter / X</a>
+        </div>
+    </div>
+</div>
+
+<div class="cta-section">
+    <div class="coupon-pill">&#127381; 80% OFF — Use code: LEARN_JAN_26</div>
+    <h2>Ready to Start Learning?</h2>
+    <p>Join 370,000+ learners who have transformed their careers with AI testing skills.<br />Master cutting-edge GenAI testing methodologies and advance your QA career today.</p>
+    <a href="https://executeautomation.com/courses" target="_blank" class="cta-btn">&#128218; Browse AI Courses</a>
+    <a href="https://executeautomation.com/paths" target="_blank" class="cta-btn outline">&#128640; View Learning Paths</a>
+</div>

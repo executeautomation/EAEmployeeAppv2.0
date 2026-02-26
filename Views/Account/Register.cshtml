@@ -1,0 +1,148 @@
+@model EAEmployee.Net8.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register — EAEmployee</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .register-wrapper {
+            width: 100%;
+            max-width: 460px;
+            padding: 1.5rem;
+        }
+        .register-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+        .register-header {
+            background: linear-gradient(135deg, #1a6b3c 0%, #28a745 100%);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+        .register-header .brand-icon {
+            width: 64px; height: 64px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.8rem;
+        }
+        .register-header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: .3rem; }
+        .register-header p  { font-size: .85rem; opacity: .85; margin: 0; }
+        .register-body { padding: 2rem; }
+        .input-group-icon { position: relative; }
+        .input-group-icon .field-icon {
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+            color: #6c757d; font-size: 1rem; pointer-events: none;
+        }
+        .input-group-icon input { padding-left: 2.6rem; }
+        .form-label { font-weight: 600; font-size: .85rem; color: #444; margin-bottom: .3rem; }
+        .form-control {
+            border-radius: 8px; border: 1.5px solid #dee2e6;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .form-control:focus { border-color: #28a745; box-shadow: 0 0 0 3px rgba(40,167,69,.15); }
+        .btn-register {
+            width: 100%; padding: .75rem;
+            background: linear-gradient(135deg, #1a6b3c, #28a745);
+            border: none; border-radius: 8px;
+            color: white; font-weight: 700; font-size: 1rem;
+            transition: opacity .2s, transform .1s;
+            margin-top: .5rem;
+        }
+        .btn-register:hover { opacity: .9; transform: translateY(-1px); }
+        .login-link {
+            display: block; text-align: center; margin-top: 1.5rem;
+            font-size: .9rem; color: #555;
+        }
+        .login-link a { color: #1a6b3c; font-weight: 600; text-decoration: none; }
+        .login-link a:hover { text-decoration: underline; }
+        .password-hint { font-size: .78rem; color: #6c757d; margin-top: .3rem; }
+    </style>
+</head>
+<body>
+    <div class="register-wrapper">
+        <div class="register-card">
+            <div class="register-header">
+                <div class="brand-icon">&#128101;</div>
+                <h1>Create Account</h1>
+                <p>Join the EAEmployee platform today</p>
+            </div>
+            <div class="register-body">
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-3" style="font-size:.85rem; display:none" id="val-summary"></div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            var s = document.getElementById('val-summary');
+                            if (s && s.innerText.trim().length > 0) s.style.display = 'block';
+                        });
+                    </script>
+
+                    <div class="mb-3">
+                        <label asp-for="UserName" class="form-label">Username</label>
+                        <div class="input-group-icon">
+                            <span class="field-icon">&#128100;</span>
+                            <input asp-for="UserName" class="form-control" autocomplete="username" placeholder="Choose a username" />
+                        </div>
+                        <span asp-validation-for="UserName" class="text-danger" style="font-size:.8rem"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Email Address</label>
+                        <div class="input-group-icon">
+                            <span class="field-icon">&#9993;</span>
+                            <input asp-for="Email" class="form-control" autocomplete="email" placeholder="you@example.com" />
+                        </div>
+                        <span asp-validation-for="Email" class="text-danger" style="font-size:.8rem"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">Password</label>
+                        <div class="input-group-icon">
+                            <span class="field-icon">&#128274;</span>
+                            <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" placeholder="Create a strong password" />
+                        </div>
+                        <div class="password-hint">Min 6 characters with uppercase, number &amp; special char.</div>
+                        <span asp-validation-for="Password" class="text-danger" style="font-size:.8rem"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                        <div class="input-group-icon">
+                            <span class="field-icon">&#128275;</span>
+                            <input asp-for="ConfirmPassword" class="form-control" type="password" autocomplete="new-password" placeholder="Repeat your password" />
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" class="text-danger" style="font-size:.8rem"></span>
+                    </div>
+
+                    <button type="submit" class="btn-register">Create Account</button>
+                </form>
+
+                <div class="login-link">
+                    Already have an account? <a asp-action="Login">Sign in here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>

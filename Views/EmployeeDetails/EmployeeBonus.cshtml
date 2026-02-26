@@ -1,0 +1,85 @@
+@model EAEmployee.Net8.Models.Employee
+@{
+    ViewData["Title"] = $"Company Contribution — {Model.Name}";
+    var gradeLabel = Model.Grade switch { 1 => "Junior", 2 => "Middle", 3 => "Senior", 4 => "C-Level", _ => Model.Grade.ToString() };
+}
+
+<style>
+    .detail-page-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.75rem; }
+    .detail-page-header .back-link {
+        display: inline-flex; align-items: center; gap: .3rem; color: #6c757d;
+        font-size: .88rem; text-decoration: none; border: 1px solid #dee2e6;
+        border-radius: 8px; padding: .35rem .75rem; transition: background .15s;
+    }
+    .detail-page-header .back-link:hover { background: #f8f9fa; color: #212529; }
+    .detail-page-header h2 { font-size: 1.4rem; font-weight: 700; color: #212529; margin: 0; }
+    .detail-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,.09); border: 1px solid #eee; overflow: hidden; max-width: 620px; }
+    .detail-card-header {
+        background: linear-gradient(135deg, #1a4d1a 0%, #28a745 100%);
+        padding: 1.5rem 2rem; display: flex; align-items: center; gap: 1rem;
+    }
+    .detail-card-header .hicon {
+        width: 52px; height: 52px; background: rgba(255,255,255,.18); border-radius: 12px;
+        display: flex; align-items: center; justify-content: center; font-size: 1.7rem; flex-shrink: 0;
+    }
+    .detail-card-header h3 { color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0; }
+    .detail-card-header p  { color: rgba(255,255,255,.7); font-size: .82rem; margin: 0; }
+    .detail-card-body { padding: 2rem; }
+    .highlight-amount {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        border: 1px solid #81c784; border-radius: 12px;
+        padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; text-align: center;
+    }
+    .highlight-amount .amount { font-size: 2rem; font-weight: 800; color: #1a4d1a; }
+    .highlight-amount .label { font-size: .82rem; color: #4a7e4a; margin-top: .2rem; }
+    .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-item { background: #f8f9fa; border-radius: 10px; padding: 1rem 1.25rem; }
+    .stat-item .s-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: #6c757d; font-weight: 600; margin-bottom: .3rem; }
+    .stat-item .s-value { font-size: 1.05rem; font-weight: 700; color: #212529; }
+    .grade-badge { display: inline-block; padding: .25rem .65rem; border-radius: 20px; font-size: .88rem; font-weight: 700; }
+    .grade-1 { background: #d1e7dd; color: #0a3622; } .grade-2 { background: #cfe2ff; color: #084298; }
+    .grade-3 { background: #fff3cd; color: #664d03; } .grade-4 { background: #f3e8ff; color: #6f42c1; }
+    .btn-back { display: inline-flex; align-items: center; gap: .4rem; background: #f0f0f0; border: 1px solid #ddd; border-radius: 8px; padding: .5rem 1.25rem; font-weight: 600; color: #444; text-decoration: none; transition: background .15s; font-size: .9rem; }
+    .btn-back:hover { background: #e2e2e2; color: #212529; }
+    @@media (max-width: 480px) { .stat-row { grid-template-columns: 1fr; } }
+</style>
+
+<div class="detail-page-header">
+    <a asp-action="Index" class="back-link">&#8592; Back to List</a>
+    <h2>Company Contribution</h2>
+</div>
+
+<div class="detail-card">
+    <div class="detail-card-header">
+        <div class="hicon">&#127970;</div>
+        <div>
+            <h3>@Model.Name</h3>
+            <p>Employer / Company PF Contribution Detail</p>
+        </div>
+    </div>
+    <div class="detail-card-body">
+        <div class="highlight-amount">
+            <div class="amount">&#8377; @ViewBag.EmployerContrib</div>
+            <div class="label">Total Company Contribution &nbsp;·&nbsp; PF 12% + Grade allowance × @Model.DurationWorked months</div>
+        </div>
+        <div class="stat-row">
+            <div class="stat-item">
+                <div class="s-label">Monthly Salary</div>
+                <div class="s-value">&#8377; @Model.Salary.ToString("N2")</div>
+            </div>
+            <div class="stat-item">
+                <div class="s-label">Duration Worked</div>
+                <div class="s-value">@Model.DurationWorked months</div>
+            </div>
+            <div class="stat-item">
+                <div class="s-label">Grade</div>
+                <div class="s-value"><span class="grade-badge grade-@Model.Grade">@gradeLabel</span></div>
+            </div>
+            <div class="stat-item">
+                <div class="s-label">Contribution Formula</div>
+                <div class="s-value" style="font-size:.85rem">PF 12% + @(Model.Grade)×2% allowance</div>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn-back">&#8592; Back to Employee Details</a>
+    </div>
+</div>

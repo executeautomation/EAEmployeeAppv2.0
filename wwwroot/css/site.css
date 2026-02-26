@@ -1,0 +1,124 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+  background-color: #f8f9fa;
+}
+
+/* ── Hero Section ─────────────────────────────── */
+.ea-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f4c81 100%);
+  min-height: 260px;
+  padding-top: 3.5rem !important;
+  padding-bottom: 3.5rem !important;
+}
+
+.ea-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 80% 20%, rgba(59,130,246,0.18) 0%, transparent 50%),
+    radial-gradient(circle at 10% 80%, rgba(16,185,129,0.12) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+/* ── Feature Cards ───────────────────────────── */
+.ea-feature-card {
+  border-radius: 14px !important;
+  transition: transform .18s ease, box-shadow .18s ease;
+  background: #fff;
+}
+
+.ea-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,.10) !important;
+}
+
+.ea-icon-wrap {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Courses Section ─────────────────────────── */
+.ea-courses-section {
+  background: linear-gradient(160deg, #0f172a 0%, #1a2744 100%);
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+.ea-courses-section h5,
+.ea-courses-section p,
+.ea-courses-section small {
+  color: #e2e8f0;
+}
+
+.ea-courses-section .text-muted {
+  color: #94a3b8 !important;
+}
+
+.ea-course-card {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  transition: background .18s ease, border-color .18s ease;
+}
+
+.ea-course-card:hover {
+  background: rgba(255,255,255,.11);
+  border-color: rgba(255,255,255,.22);
+}
+
+.ea-course-card h6 {
+  color: #f1f5f9;
+}
+
+.ea-course-badge {
+  font-size: .68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.ea-course-badge.beginner   { background: #dcfce7; color: #166534; }
+.ea-course-badge.intermediate { background: #dbeafe; color: #1e40af; }
+.ea-course-badge.expert     { background: #fce7f3; color: #9d174d; }
+.ea-course-badge.advanced   { background: #fef9c3; color: #713f12; }
+
+.ea-enroll-link {
+  font-size: .78rem;
+  font-weight: 600;
+  color: #60a5fa;
+  text-decoration: none;
+  transition: color .15s;
+}
+
+.ea-enroll-link:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
+.ea-courses-section code {
+  color: #fbbf24;
+  background: rgba(251,191,36,.12) !important;
+}

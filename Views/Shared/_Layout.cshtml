@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EAEmployee</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        .ea-navbar {
+            background: linear-gradient(90deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            box-shadow: 0 2px 16px rgba(0,0,0,.35);
+            padding: .6rem 0;
+        }
+        .ea-navbar .navbar-brand {
+            font-weight: 800; font-size: 1.15rem; letter-spacing: .02em;
+            color: #fff !important;
+            display: flex; align-items: center; gap: .5rem;
+        }
+        .ea-navbar .navbar-brand .brand-icon {
+            height: 36px;
+            width: auto;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .ea-navbar .nav-link {
+            color: rgba(255,255,255,.75) !important;
+            font-size: .9rem; font-weight: 500;
+            padding: .45rem .85rem !important;
+            border-radius: 8px;
+            transition: background .15s, color .15s;
+            position: relative;
+        }
+        .ea-navbar .nav-link:hover,
+        .ea-navbar .nav-link.active { color: #fff !important; background: rgba(255,255,255,.12); }
+        .ea-navbar .nav-divider {
+            width: 1px; height: 20px; background: rgba(255,255,255,.2);
+            margin: auto .5rem;
+        }
+        .ea-navbar .nav-pill {
+            background: rgba(40,167,69,.25); border: 1px solid rgba(40,167,69,.45);
+            color: #6ee09a !important; font-size: .78rem; font-weight: 700;
+            padding: .2rem .7rem !important; border-radius: 20px;
+        }
+        .ea-navbar .nav-pill:hover { background: rgba(40,167,69,.4); }
+        .ea-footer {
+            background: linear-gradient(90deg, #0f2027, #2c5364);
+            color: rgba(255,255,255,.5); font-size: .82rem;
+            padding: 1rem 0; margin-top: 3rem;
+            border-top: 1px solid rgba(255,255,255,.08);
+        }
+        .ea-footer a { color: rgba(255,255,255,.65); text-decoration: none; }
+        .ea-footer a:hover { color: #fff; }
+    </style>
+</head>
+<body style="background:#f4f6f9; min-height:100vh;">
+    <header>
+        <nav class="navbar navbar-expand-sm ea-navbar mb-4">
+            <div class="container">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo.png" alt="EAEmployee Logo" class="brand-icon" />
+                </a>
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav me-auto align-items-center gap-1">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">&#127968; Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Employee" asp-action="Index">&#128101; Employees</a>
+                        </li>
+                        @if (User.IsInRole("Administrator") || User.IsInRole("User"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link nav-pill" asp-controller="EmployeeDetails" asp-action="Index">&#128200; Details</a>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="About">&#8505;&#65039; About</a>
+                        </li>
+                    </ul>
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-4">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="ea-footer">
+        <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span>&copy; @DateTime.Now.Year <a href="https://executeautomation.com" target="_blank">ExecuteAutomation.com</a> &mdash; All rights reserved.</span>
+            <span>Built with ASP.NET Core 8 &amp; &#10084;&#65039;</span>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

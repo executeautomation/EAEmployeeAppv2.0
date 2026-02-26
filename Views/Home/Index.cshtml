@@ -1,0 +1,256 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Hero Section -->
+<div class="ea-hero rounded-4 mb-5 position-relative overflow-hidden">
+    <div class="ea-hero-bg"></div>
+
+    <!-- Decorative blobs -->
+    <div style="position:absolute;top:-60px;right:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(255,255,255,.07) 0%,transparent 70%);border-radius:50%;pointer-events:none;"></div>
+    <div style="position:absolute;bottom:-80px;left:-40px;width:280px;height:280px;background:radial-gradient(circle,rgba(74,144,194,.12) 0%,transparent 70%);border-radius:50%;pointer-events:none;"></div>
+
+    <div class="position-relative z-1 d-flex align-items-center justify-content-between flex-wrap gap-4 p-5">
+        <!-- Left: text content -->
+        <div style="flex:1;min-width:260px;max-width:560px">
+            <span style="display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#d4eaff;font-size:.75rem;font-weight:700;letter-spacing:.07em;padding:.3rem 1rem;border-radius:20px;margin-bottom:1.25rem;text-transform:uppercase;">
+                ⚡ ASP.NET Core 8 · EF Core · Identity
+            </span>
+            <h1 style="font-size:clamp(2rem,4vw,3rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:1rem;">
+                Employee Management<br />
+                <span style="background:linear-gradient(90deg,#7ec8f7,#a8d8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+                    Built for Scale
+                </span>
+            </h1>
+            <p style="color:rgba(255,255,255,.7);font-size:1.05rem;line-height:1.7;margin-bottom:1.75rem;max-width:480px">
+                A modern, role-aware HR system powered by ExecuteAutomation. Manage employees, track PF contributions, and control access — all in one place.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                <a asp-controller="Employee" asp-action="Index"
+                   style="background:#fff;color:#1a3a5c;font-weight:700;font-size:.95rem;padding:.72rem 1.75rem;border-radius:10px;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;transition:transform .1s,box-shadow .15s;box-shadow:0 4px 18px rgba(0,0,0,.2);"
+                   onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                    View Employees &rarr;
+                </a>
+                @if (!User.Identity!.IsAuthenticated)
+                {
+                    <a asp-controller="Account" asp-action="Login"
+                       style="background:transparent;border:2px solid rgba(255,255,255,.45);color:#fff;font-weight:600;font-size:.95rem;padding:.72rem 1.75rem;border-radius:10px;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;transition:background .15s;"
+                       onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='transparent'">
+                        Sign In
+                    </a>
+                }
+            </div>
+
+            <!-- stat pills -->
+            <div class="d-flex flex-wrap gap-3 mt-4">
+                <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:.5rem 1rem;text-align:center;">
+                    <div style="font-size:1.1rem;font-weight:800;color:#fff;">370K+</div>
+                    <div style="font-size:.72rem;color:rgba(255,255,255,.6);letter-spacing:.04em;">Students</div>
+                </div>
+                <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:.5rem 1rem;text-align:center;">
+                    <div style="font-size:1.1rem;font-weight:800;color:#fff;">40+</div>
+                    <div style="font-size:.72rem;color:rgba(255,255,255,.6);letter-spacing:.04em;">Courses</div>
+                </div>
+                <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:.5rem 1rem;text-align:center;">
+                    <div style="font-size:1.1rem;font-weight:800;color:#fff;">198</div>
+                    <div style="font-size:.72rem;color:rgba(255,255,255,.6);letter-spacing:.04em;">Countries</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: logo display -->
+        <div style="flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+            <div style="position:relative;">
+                <!-- outer glow ring -->
+                <div style="position:absolute;inset:-18px;border-radius:30px;background:radial-gradient(circle,rgba(126,200,247,.25) 0%,transparent 70%);animation:ea-pulse 3s ease-in-out infinite;"></div>
+                <!-- glass card behind logo -->
+                <div style="background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);border-radius:26px;padding:2rem;box-shadow:0 20px 60px rgba(0,0,0,.35);">
+                    <img src="~/images/EA-Icon-green.png" alt="ExecuteAutomation"
+                         style="width:clamp(130px,18vw,200px);height:auto;display:block;filter:drop-shadow(0 8px 24px rgba(0,0,0,.4));" />
+                </div>
+                <!-- ExecuteAutomation label below -->
+                <div style="text-align:center;margin-top:.85rem;">
+                    <span style="color:rgba(255,255,255,.55);font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;">ExecuteAutomation</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@@keyframes ea-pulse {
+    0%, 100% { opacity: .6; transform: scale(1); }
+    50%       { opacity: 1;  transform: scale(1.05); }
+}
+</style>
+
+<!-- Feature Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm ea-feature-card">
+            <div class="card-body p-4">
+                <div class="ea-icon-wrap bg-primary-subtle mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#0d6efd" viewBox="0 0 16 16">
+                        <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
+                    </svg>
+                </div>
+                <h5 class="fw-bold mb-2">Employee Management</h5>
+                <p class="text-muted small mb-3">Create, edit, search and delete employees with role-based access. Administrators get full control.</p>
+                <a asp-controller="Employee" asp-action="Index" class="btn btn-sm btn-outline-primary">Browse Employees</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm ea-feature-card">
+            <div class="card-body p-4">
+                <div class="ea-icon-wrap bg-success-subtle mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#198754" viewBox="0 0 16 16">
+                        <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783"/>
+                    </svg>
+                </div>
+                <h5 class="fw-bold mb-2">PF & Contributions</h5>
+                <p class="text-muted small mb-3">View employee and employer PF contributions calculated inline from salary and duration worked.</p>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a asp-controller="EmployeeDetails" asp-action="Index" class="btn btn-sm btn-outline-success">View Details</a>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-sm btn-outline-success">Sign in to view</a>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm ea-feature-card">
+            <div class="card-body p-4">
+                <div class="ea-icon-wrap bg-warning-subtle mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#ffc107" viewBox="0 0 16 16">
+                        <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
+                    </svg>
+                </div>
+                <h5 class="fw-bold mb-2">Role-Based Access</h5>
+                <p class="text-muted small mb-3">Administrators manage all data. Users access employee details. Secured with ASP.NET Core Identity.</p>
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-sm btn-outline-warning">Create Account</a>
+                }
+                else
+                {
+                    <a asp-controller="Manage" asp-action="Index" class="btn btn-sm btn-outline-warning">My Account</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- EA Courses Ad Banner -->
+<div class="ea-courses-section rounded-4 p-4 mb-2">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <span class="badge rounded-pill px-3 py-1 mb-1" style="background:#ff6b35; font-size:.72rem">SPONSORED</span>
+            <h5 class="fw-bold mb-0">🚀 Level Up with ExecuteAutomation</h5>
+            <p class="text-muted small mb-0">Your path to AI QA Engineering — 370,000+ students enrolled</p>
+        </div>
+        <a href="https://www.executeautomation.com/paths" target="_blank" class="btn btn-sm btn-dark px-3">
+            View All Courses →
+        </a>
+    </div>
+
+    <div class="row g-3">
+        <!-- Course 1 -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="ea-course-card p-3 rounded-3 h-100">
+                <div class="d-flex align-items-start gap-2 mb-2">
+                    <span class="ea-course-badge beginner">Beginner</span>
+                </div>
+                <h6 class="fw-semibold mb-1" style="font-size:.88rem">Generative AI in Software Testing</h6>
+                <p class="text-muted mb-2" style="font-size:.77rem">GenAI fundamentals, prompt engineering, AI Agents, Selenium & Playwright with AI.</p>
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="text-warning small">★ 4.7</span>
+                    <span class="text-muted" style="font-size:.75rem">8,000+ students · 8 hrs</span>
+                </div>
+                <a href="https://www.udemy.com/course/generative-ai-in-software-automation-testing/?couponCode=LEARN_JAN_26" target="_blank" class="ea-enroll-link">Enroll on Udemy ↗</a>
+            </div>
+        </div>
+        <!-- Course 2 -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="ea-course-card p-3 rounded-3 h-100">
+                <div class="d-flex align-items-start gap-2 mb-2">
+                    <span class="ea-course-badge intermediate">Intermediate</span>
+                </div>
+                <h6 class="fw-semibold mb-1" style="font-size:.88rem">Test AI &amp; LLM Apps with DeepEval &amp; RAGAs</h6>
+                <p class="text-muted mb-2" style="font-size:.77rem">DeepEval, RAGAs, Ollama, Confident AI — comprehensive AI app validation.</p>
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="text-warning small">★ 4.8</span>
+                    <span class="text-muted" style="font-size:.75rem">3,000+ students · 18 hrs</span>
+                </div>
+                <a href="https://www.udemy.com/course/ai-testing-deepeval-ragas-ollama/?couponCode=LEARN_JAN_26" target="_blank" class="ea-enroll-link">Enroll on Udemy ↗</a>
+            </div>
+        </div>
+        <!-- Course 3 -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="ea-course-card p-3 rounded-3 h-100">
+                <div class="d-flex align-items-start gap-2 mb-2">
+                    <span class="ea-course-badge intermediate">Intermediate</span>
+                </div>
+                <h6 class="fw-semibold mb-1" style="font-size:.88rem">AI-Driven Test Automation: Playwright, Selenium &amp; LLMs</h6>
+                <p class="text-muted mb-2" style="font-size:.77rem">Self-healing locators, Ollama local LLMs, intelligent Selenium &amp; Playwright frameworks.</p>
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="text-warning small">★ 4.8</span>
+                    <span class="text-muted" style="font-size:.75rem">1,200+ students · 15 hrs</span>
+                </div>
+                <a href="https://www.udemy.com/course/ai-test-automation-selenium-playwright-llms/?couponCode=LEARN_JAN_26" target="_blank" class="ea-enroll-link">Enroll on Udemy ↗</a>
+            </div>
+        </div>
+        <!-- Course 4 -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="ea-course-card p-3 rounded-3 h-100">
+                <div class="d-flex align-items-start gap-2 mb-2">
+                    <span class="ea-course-badge intermediate">Intermediate</span>
+                </div>
+                <h6 class="fw-semibold mb-1" style="font-size:.88rem">Build &amp; Test AI Agents, ChatBot, RAG with Ollama</h6>
+                <p class="text-muted mb-2" style="font-size:.77rem">Build multi-agent systems, RAG, and ChatBots using LangChain, LangSmith &amp; local LLMs.</p>
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="text-warning small">★ 5.0</span>
+                    <span class="text-muted" style="font-size:.75rem">82+ students · 15 hrs</span>
+                </div>
+                <a href="https://www.udemy.com/course/genai-multi-agent-software-testing/?couponCode=LEARN_JAN_26" target="_blank" class="ea-enroll-link">Enroll on Udemy ↗</a>
+            </div>
+        </div>
+        <!-- Course 5 -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="ea-course-card p-3 rounded-3 h-100">
+                <div class="d-flex align-items-start gap-2 mb-2">
+                    <span class="ea-course-badge expert">Expert</span>
+                </div>
+                <h6 class="fw-semibold mb-1" style="font-size:.88rem">Build GenAI &amp; Multi-Agent Systems for Software Testing</h6>
+                <p class="text-muted mb-2" style="font-size:.77rem">AutoGen, LangChain, AI Agents, ChatBot, RAG with Ollama and local LLMs.</p>
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="text-warning small">★ 4.9</span>
+                    <span class="text-muted" style="font-size:.75rem">1,200+ students · 20 hrs</span>
+                </div>
+                <a href="https://www.udemy.com/course/build-ai-agent-chatbot-rag-langchain-local-llm/?couponCode=LEARN_JAN_26" target="_blank" class="ea-enroll-link">Enroll on Udemy ↗</a>
+            </div>
+        </div>
+        <!-- Course 6 -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="ea-course-card p-3 rounded-3 h-100">
+                <div class="d-flex align-items-start gap-2 mb-2">
+                    <span class="ea-course-badge advanced">Advanced</span>
+                </div>
+                <h6 class="fw-semibold mb-1" style="font-size:.88rem">Test &amp; Fine-tune AI Models with HuggingFace</h6>
+                <p class="text-muted mb-2" style="font-size:.77rem">Transformer models, HuggingFace NLP — test, evaluate, and fine-tune AI models.</p>
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="text-warning small">★ 4.9</span>
+                    <span class="text-muted" style="font-size:.75rem">1,500+ students · 12 hrs</span>
+                </div>
+                <a href="https://www.udemy.com/course/ai-with-huggingface/?couponCode=LEARN_JAN_26" target="_blank" class="ea-enroll-link">Enroll on Udemy ↗</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-3">
+        <small class="text-muted">Use code <code class="bg-body-secondary px-1 rounded">LEARN_JAN_26</code> for up to 80% off on Udemy</small>
+    </div>
+</div>

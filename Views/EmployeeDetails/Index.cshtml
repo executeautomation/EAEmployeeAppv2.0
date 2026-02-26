@@ -1,0 +1,113 @@
+@model IEnumerable<EAEmployee.Net8.Models.Employee>
+@{
+    ViewData["Title"] = "Employee Details";
+    var total = Model.Count();
+}
+
+<style>
+    .page-header-bar {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+        border-radius: 14px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 1rem;
+    }
+    .page-header-bar .page-title { color: #fff; font-size: 1.5rem; font-weight: 700; margin: 0; }
+    .page-header-bar .page-subtitle { color: rgba(255,255,255,.6); font-size: .85rem; margin: 0; }
+    .stat-badge {
+        background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+        color: #fff; border-radius: 8px; padding: .4rem 1rem; font-size: .85rem; font-weight: 600;
+    }
+    .employee-table-card {
+        background: #fff; border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(0,0,0,.08);
+        overflow: hidden; border: 1px solid #eee;
+    }
+    .employee-table-card table { margin: 0; font-size: .92rem; }
+    .employee-table-card thead th {
+        background: #f8f9fa; color: #495057;
+        font-weight: 700; text-transform: uppercase;
+        font-size: .76rem; letter-spacing: .05em;
+        border-bottom: 2px solid #e9ecef; padding: .9rem 1rem;
+    }
+    .employee-table-card tbody tr { transition: background .15s; }
+    .employee-table-card tbody tr:hover { background: #f0f7ff; }
+    .employee-table-card tbody td { padding: .85rem 1rem; vertical-align: middle; border-color: #f0f0f0; }
+    .emp-name { font-weight: 600; color: #212529; }
+    .salary-cell { font-weight: 600; color: #1a6b3c; }
+    .grade-badge { display: inline-block; padding: .25rem .65rem; border-radius: 20px; font-size: .78rem; font-weight: 700; }
+    .grade-1 { background: #d1e7dd; color: #0a3622; }
+    .grade-2 { background: #cfe2ff; color: #084298; }
+    .grade-3 { background: #fff3cd; color: #664d03; }
+    .grade-4 { background: #f3e8ff; color: #6f42c1; }
+    .grade-default { background: #e9ecef; color: #495057; }
+    .action-group { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .btn-pf {
+        background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9;
+        border-radius: 6px; padding: .3rem .75rem; font-size: .8rem; font-weight: 600;
+        text-decoration: none; transition: background .15s; white-space: nowrap;
+    }
+    .btn-pf:hover { background: #90caf9; color: #0d47a1; }
+    .btn-bonus {
+        background: #d1e7dd; color: #0a3622; border: 1px solid #86d3a8;
+        border-radius: 6px; padding: .3rem .75rem; font-size: .8rem; font-weight: 600;
+        text-decoration: none; transition: background .15s; white-space: nowrap;
+    }
+    .btn-bonus:hover { background: #86d3a8; color: #052d13; }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: #adb5bd; }
+    .empty-state .es-icon { font-size: 3rem; margin-bottom: .75rem; display: block; }
+</style>
+
+<div class="page-header-bar">
+    <div>
+        <p class="page-title">&#128203; Employee Details</p>
+        <p class="page-subtitle">PF &amp; Company contribution breakdown per employee</p>
+    </div>
+    <span class="stat-badge">&#128202; @total employee@(total != 1 ? "s" : "")</span>
+</div>
+
+<div class="employee-table-card">
+    <table class="table table-borderless">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(m => m.Name)</th>
+                <th>@Html.DisplayNameFor(m => m.Salary)</th>
+                <th>@Html.DisplayNameFor(m => m.Grade)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="4">
+                        <div class="empty-state">
+                            <span class="es-icon">&#128203;</span>
+                            <p>No employee records found.</p>
+                        </div>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    var gradeCss = item.Grade switch { 1 => "grade-1", 2 => "grade-2", 3 => "grade-3", 4 => "grade-4", _ => "grade-default" };
+                    var gradeLabel = item.Grade switch { 1 => "Junior", 2 => "Middle", 3 => "Senior", 4 => "C-Level", _ => item.Grade.ToString() };
+                    <tr>
+                        <td><span class="emp-name">@item.Name</span></td>
+                        <td><span class="salary-cell">&#8377; @item.Salary.ToString("N2")</span></td>
+                        <td><span class="grade-badge @gradeCss">@gradeLabel</span></td>
+                        <td>
+                            <div class="action-group">
+                                <a asp-action="EmployeePF" asp-route-id="@item.Id" class="btn-pf">&#128200; PF Contribution</a>
+                                <a asp-action="EmployeeBonus" asp-route-id="@item.Id" class="btn-bonus">&#127970; Company Contribution</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
