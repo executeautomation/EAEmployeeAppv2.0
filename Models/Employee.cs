@@ -15,6 +15,11 @@ public class Employee
     public float Salary { get; set; }
 
     [Required]
+    [Display(Name = "Age")]
+    [Range(18, 100, ErrorMessage = "Age must be between 18 and 100")]
+    public int Age { get; set; }
+
+    [Required]
     [Display(Name = "Duration Worked (months)")]
     public int DurationWorked { get; set; }
 
