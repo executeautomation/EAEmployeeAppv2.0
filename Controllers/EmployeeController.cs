@@ -38,6 +38,26 @@ public class EmployeeController : Controller
     {
         if (ModelState.IsValid)
         {
+            var existing = await _db.Employees
+                .FirstOrDefaultAsync(e => e.Email == employee.Email);
+            if (existing != null)
+            {
+                return Json(new
+                {
+                    isDuplicate = true,
+                    employee = new
+                    {
+                        existing.Id,
+                        existing.Name,
+                        existing.Email,
+                        existing.Salary,
+                        existing.Age,
+                        existing.DurationWorked,
+                        existing.Grade
+                    }
+                });
+            }
+
             _db.Employees.Add(employee);
             await _db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

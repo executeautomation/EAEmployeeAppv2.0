@@ -1,0 +1,356 @@
+@using EAEmployee.Net8.Models
+@{
+    ViewData["Title"] = "Dashboard";
+    int total = ViewBag.TotalEmployees;
+    float avgSalary = ViewBag.AverageSalary;
+    double avgAge = ViewBag.AverageAge;
+    float totalBill = ViewBag.TotalSalaryBill;
+
+    int junior = ViewBag.JuniorCount;
+    int middle = ViewBag.MiddleCount;
+    int senior = ViewBag.SeniorCount;
+    int clevel = ViewBag.CLevelCount;
+
+    int under30 = ViewBag.Under30;
+    int age30 = ViewBag.Age30to39;
+    int age40 = ViewBag.Age40to49;
+    int age50 = ViewBag.Age50to59;
+    int age60 = ViewBag.Age60Plus;
+
+    int retirement = ViewBag.RetirementCount;
+    int nearRetirement = ViewBag.NearRetirementCount;
+
+    var topEarners = (List<Employee>)ViewBag.TopEarners;
+    var mostExperienced = (List<Employee>)ViewBag.MostExperienced;
+
+    int maxAge = new[] { under30, age30, age40, age50, age60 }.DefaultIfEmpty(1).Max();
+    if (maxAge == 0) maxAge = 1;
+
+    int maxGrade = new[] { junior, middle, senior, clevel }.DefaultIfEmpty(1).Max();
+    if (maxGrade == 0) maxGrade = 1;
+}
+
+<style>
+    .dash-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+        border-radius: 16px; padding: 1.75rem 2rem; margin-bottom: 1.75rem;
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .dash-header h1 { color: #fff; font-size: 1.6rem; font-weight: 800; margin: 0; }
+    .dash-header p { color: rgba(255,255,255,.6); font-size: .88rem; margin: .25rem 0 0; }
+    .dash-header .refresh-btn {
+        background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+        color: #fff; border-radius: 8px; padding: .45rem 1.1rem; font-size: .85rem;
+        font-weight: 600; text-decoration: none; transition: background .15s;
+    }
+    .dash-header .refresh-btn:hover { background: rgba(255,255,255,.2); color: #fff; }
+
+    /* Stat Cards */
+    .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 1.75rem; }
+    .stat-card {
+        background: #fff; border-radius: 14px; padding: 1.4rem 1.5rem;
+        box-shadow: 0 3px 16px rgba(0,0,0,.06); border: 1px solid #eee;
+        position: relative; overflow: hidden; transition: transform .15s;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-card .sc-icon {
+        width: 44px; height: 44px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem; margin-bottom: .85rem;
+    }
+    .stat-card .sc-value { font-size: 1.75rem; font-weight: 800; color: #212529; line-height: 1; }
+    .stat-card .sc-label { font-size: .78rem; color: #6c757d; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-top: .35rem; }
+    .stat-card .sc-accent {
+        position: absolute; top: 0; right: 0; width: 80px; height: 80px;
+        border-radius: 0 14px 0 80px; opacity: .08;
+    }
+    .sc-blue .sc-icon { background: #e3f2fd; color: #1565c0; }
+    .sc-blue .sc-accent { background: #1565c0; }
+    .sc-green .sc-icon { background: #e8f5e9; color: #2e7d32; }
+    .sc-green .sc-accent { background: #2e7d32; }
+    .sc-orange .sc-icon { background: #fff3e0; color: #e65100; }
+    .sc-orange .sc-accent { background: #e65100; }
+    .sc-purple .sc-icon { background: #f3e5f5; color: #7b1fa2; }
+    .sc-purple .sc-accent { background: #7b1fa2; }
+
+    /* Panels */
+    .panel {
+        background: #fff; border-radius: 14px; box-shadow: 0 3px 16px rgba(0,0,0,.06);
+        border: 1px solid #eee; overflow: hidden; margin-bottom: 1.5rem;
+    }
+    .panel-head {
+        padding: 1.1rem 1.5rem; border-bottom: 1px solid #f0f0f0;
+        display: flex; align-items: center; gap: .6rem;
+    }
+    .panel-head h3 { font-size: 1rem; font-weight: 700; color: #212529; margin: 0; }
+    .panel-head .ph-icon { font-size: 1.15rem; }
+    .panel-body { padding: 1.5rem; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; flex-direction: column; gap: .75rem; }
+    .bar-row { display: flex; align-items: center; gap: .75rem; }
+    .bar-label { width: 70px; font-size: .8rem; font-weight: 600; color: #495057; text-align: right; flex-shrink: 0; }
+    .bar-track { flex: 1; height: 28px; background: #f0f2f5; border-radius: 8px; overflow: hidden; position: relative; }
+    .bar-fill {
+        height: 100%; border-radius: 8px; display: flex; align-items: center;
+        padding: 0 .75rem; font-size: .75rem; font-weight: 700; color: #fff;
+        min-width: 32px; transition: width .6s ease;
+    }
+    .bar-count { width: 36px; font-size: .82rem; font-weight: 700; color: #212529; text-align: center; flex-shrink: 0; }
+
+    /* Retirement alert */
+    .retirement-alert {
+        background: linear-gradient(135deg, #fff5f5, #ffe8e8);
+        border: 1px solid #ffcdd2; border-radius: 14px;
+        padding: 1.5rem; display: flex; align-items: flex-start; gap: 1rem;
+    }
+    .retirement-alert .ra-icon {
+        width: 48px; height: 48px; background: #ffebee; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem; flex-shrink: 0;
+    }
+    .retirement-alert h4 { font-size: 1rem; font-weight: 700; color: #b71c1c; margin: 0 0 .3rem; }
+    .retirement-alert p { font-size: .85rem; color: #c62828; margin: 0; }
+    .retirement-alert .ra-count {
+        font-size: 2rem; font-weight: 800; color: #b71c1c; line-height: 1;
+    }
+
+    /* Leaderboard */
+    .leader-list { list-style: none; padding: 0; margin: 0; }
+    .leader-list li {
+        display: flex; align-items: center; gap: .75rem;
+        padding: .7rem 0; border-bottom: 1px solid #f5f5f5;
+    }
+    .leader-list li:last-child { border-bottom: none; }
+    .leader-rank {
+        width: 28px; height: 28px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .75rem; font-weight: 800; flex-shrink: 0;
+    }
+    .rank-1 { background: linear-gradient(135deg, #ffd700, #ffb300); color: #5d4000; }
+    .rank-2 { background: linear-gradient(135deg, #e0e0e0, #bdbdbd); color: #424242; }
+    .rank-3 { background: linear-gradient(135deg, #ffcc80, #ff9800); color: #4e2a00; }
+    .rank-other { background: #f0f2f5; color: #757575; }
+    .leader-name { font-weight: 600; font-size: .88rem; color: #212529; }
+    .leader-value { margin-left: auto; font-weight: 700; font-size: .88rem; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @@media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .empty-dash {
+        text-align: center; padding: 3rem; color: #adb5bd;
+    }
+    .empty-dash .ed-icon { font-size: 3.5rem; display: block; margin-bottom: 1rem; }
+</style>
+
+<!-- Header -->
+<div class="dash-header">
+    <div>
+        <h1>&#128202; Workforce Dashboard</h1>
+        <p>Real-time analytics of your employee data</p>
+    </div>
+    <a asp-action="Dashboard" class="refresh-btn">&#8635; Refresh</a>
+</div>
+
+@if (total == 0)
+{
+    <div class="panel">
+        <div class="panel-body">
+            <div class="empty-dash">
+                <span class="ed-icon">&#128202;</span>
+                <h4 style="color:#495057; font-weight:700;">No Data Yet</h4>
+                <p>Add employees to see dashboard analytics.</p>
+                @if (User.IsInRole("Administrator"))
+                {
+                    <a asp-controller="Employee" asp-action="Create" class="btn btn-primary mt-2">+ Add Employee</a>
+                }
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- KPI Cards -->
+    <div class="stat-cards">
+        <div class="stat-card sc-blue">
+            <div class="sc-accent"></div>
+            <div class="sc-icon">&#128101;</div>
+            <div class="sc-value">@total</div>
+            <div class="sc-label">Total Employees</div>
+        </div>
+        <div class="stat-card sc-green">
+            <div class="sc-accent"></div>
+            <div class="sc-icon">&#128176;</div>
+            <div class="sc-value">$@avgSalary.ToString("N0")</div>
+            <div class="sc-label">Average Salary</div>
+        </div>
+        <div class="stat-card sc-orange">
+            <div class="sc-accent"></div>
+            <div class="sc-icon">&#128197;</div>
+            <div class="sc-value">@avgAge.ToString("F1")</div>
+            <div class="sc-label">Average Age</div>
+        </div>
+        <div class="stat-card sc-purple">
+            <div class="sc-accent"></div>
+            <div class="sc-icon">&#128200;</div>
+            <div class="sc-value">$@totalBill.ToString("N0")</div>
+            <div class="sc-label">Monthly Salary Bill</div>
+        </div>
+    </div>
+
+    <!-- Retirement Alert -->
+    @if (retirement > 0 || nearRetirement > 0)
+    {
+        <div class="retirement-alert mb-4">
+            <div class="ra-icon">&#9888;&#65039;</div>
+            <div style="flex:1;">
+                <h4>Retirement Planning Alert</h4>
+                <p>
+                    <strong>@retirement</strong> employee@(retirement != 1 ? "s" : "") at retirement age (60+)
+                    @if (nearRetirement > 0)
+                    {
+                        <text> and <strong>@nearRetirement</strong> approaching retirement (55–59)</text>
+                    }
+                </p>
+            </div>
+            <div class="ra-count">@(retirement + nearRetirement)</div>
+        </div>
+    }
+
+    <!-- Charts Row -->
+    <div class="grid-2">
+        <!-- Age Distribution -->
+        <div class="panel">
+            <div class="panel-head">
+                <span class="ph-icon">&#128197;</span>
+                <h3>Age Distribution</h3>
+            </div>
+            <div class="panel-body">
+                <div class="bar-chart">
+                    <div class="bar-row">
+                        <span class="bar-label">&lt; 30</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:@(Math.Max((int)(under30 * 100.0 / maxAge), 4))%;background:linear-gradient(90deg,#4caf50,#81c784);">@under30</div>
+                        </div>
+                        <span class="bar-count">@under30</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">30 – 39</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:@(Math.Max((int)(age30 * 100.0 / maxAge), 4))%;background:linear-gradient(90deg,#2196f3,#64b5f6);">@age30</div>
+                        </div>
+                        <span class="bar-count">@age30</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">40 – 49</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:@(Math.Max((int)(age40 * 100.0 / maxAge), 4))%;background:linear-gradient(90deg,#ff9800,#ffb74d);">@age40</div>
+                        </div>
+                        <span class="bar-count">@age40</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">50 – 59</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:@(Math.Max((int)(age50 * 100.0 / maxAge), 4))%;background:linear-gradient(90deg,#9c27b0,#ce93d8);">@age50</div>
+                        </div>
+                        <span class="bar-count">@age50</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">60+</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:@(Math.Max((int)(age60 * 100.0 / maxAge), 4))%;background:linear-gradient(90deg,#e53935,#ef5350);">@age60</div>
+                        </div>
+                        <span class="bar-count">@age60</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grade Breakdown -->
+        <div class="panel">
+            <div class="panel-head">
+                <span class="ph-icon">&#127942;</span>
+                <h3>Grade Breakdown</h3>
+            </div>
+            <div class="panel-body">
+                <div class="bar-chart">
+                    <div class="bar-row">
+                        <span class="bar-label">Junior</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:@(Math.Max((int)(junior * 100.0 / maxGrade), 4))%;background:linear-gradient(90deg,#0a3622,#2e7d32);">@junior</div>
+                        </div>
+                        <span class="bar-count">@junior</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">Middle</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:@(Math.Max((int)(middle * 100.0 / maxGrade), 4))%;background:linear-gradient(90deg,#084298,#1565c0);">@middle</div>
+                        </div>
+                        <span class="bar-count">@middle</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">Senior</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:@(Math.Max((int)(senior * 100.0 / maxGrade), 4))%;background:linear-gradient(90deg,#e65100,#ff9800);">@senior</div>
+                        </div>
+                        <span class="bar-count">@senior</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label">C-Level</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:@(Math.Max((int)(clevel * 100.0 / maxGrade), 4))%;background:linear-gradient(90deg,#6a1b9a,#ab47bc);">@clevel</div>
+                        </div>
+                        <span class="bar-count">@clevel</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboards Row -->
+    <div class="grid-2">
+        <!-- Top Earners -->
+        <div class="panel">
+            <div class="panel-head">
+                <span class="ph-icon">&#128176;</span>
+                <h3>Top Earners</h3>
+            </div>
+            <div class="panel-body">
+                <ul class="leader-list">
+                    @for (int i = 0; i < topEarners.Count; i++)
+                    {
+                        var emp = topEarners[i];
+                        var rankCss = i == 0 ? "rank-1" : i == 1 ? "rank-2" : i == 2 ? "rank-3" : "rank-other";
+                        <li>
+                            <span class="leader-rank @rankCss">@(i + 1)</span>
+                            <span class="leader-name">@emp.Name</span>
+                            <span class="leader-value" style="color:#1a6b3c;">$@emp.Salary.ToString("N0")</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <!-- Most Experienced -->
+        <div class="panel">
+            <div class="panel-head">
+                <span class="ph-icon">&#128197;</span>
+                <h3>Most Experienced</h3>
+            </div>
+            <div class="panel-body">
+                <ul class="leader-list">
+                    @for (int i = 0; i < mostExperienced.Count; i++)
+                    {
+                        var emp = mostExperienced[i];
+                        var rankCss = i == 0 ? "rank-1" : i == 1 ? "rank-2" : i == 2 ? "rank-3" : "rank-other";
+                        <li>
+                            <span class="leader-rank @rankCss">@(i + 1)</span>
+                            <span class="leader-name">@emp.Name</span>
+                            <span class="leader-value" style="color:#1565c0;">@emp.DurationWorked mo.</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+}

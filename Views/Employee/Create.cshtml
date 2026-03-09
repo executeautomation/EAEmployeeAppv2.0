@@ -120,6 +120,15 @@
 
             <div class="form-row-2">
                 <div class="field-group">
+                    <label asp-for="Age">Age</label>
+                    <div class="input-icon-wrap">
+                        <span class="fi">&#128197;</span>
+                        <input asp-for="Age" placeholder="e.g. 30" type="number" min="18" max="100" />
+                    </div>
+                    <span asp-validation-for="Age" class="validation-msg"></span>
+                </div>
+
+                <div class="field-group">
                     <label asp-for="Salary">Monthly Salary</label>
                     <div class="input-icon-wrap">
                         <span class="salary-prefix">$</span>
@@ -127,7 +136,9 @@
                     </div>
                     <span asp-validation-for="Salary" class="validation-msg"></span>
                 </div>
+            </div>
 
+            <div class="form-row-2">
                 <div class="field-group">
                     <label asp-for="DurationWorked">Duration Worked (months)</label>
                     <div class="input-icon-wrap">
@@ -136,9 +147,6 @@
                     </div>
                     <span asp-validation-for="DurationWorked" class="validation-msg"></span>
                 </div>
-            </div>
-
-            <div class="form-row-2">
                 <div class="field-group">
                     <label asp-for="Grade">Grade</label>
                     <div class="input-icon-wrap">
@@ -168,7 +176,74 @@
     </div>
 </div>
 
+<!-- Duplicate Employee Modal -->
+<div class="modal fade" id="duplicateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border:none;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.18);">
+            <div style="background:linear-gradient(135deg,#dc3545 0%,#c82333 100%);padding:1.5rem 2rem;display:flex;align-items:center;gap:1rem;">
+                <div style="width:48px;height:48px;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">&#9888;&#65039;</div>
+                <div>
+                    <h5 style="color:#fff;font-weight:700;margin:0;font-size:1.1rem;">Duplicate Employee Found</h5>
+                    <p style="color:rgba(255,255,255,.75);margin:0;font-size:.82rem;">An employee with this email already exists</p>
+                </div>
+            </div>
+            <div style="padding:1.75rem 2rem;">
+                <div id="dupDetails" style="background:#f8f9fa;border-radius:12px;padding:1.25rem;border:1px solid #eee;">
+                </div>
+                <p style="margin:1.25rem 0 0;font-size:.85rem;color:#6c757d;">Please use a different email address or edit the existing employee record.</p>
+            </div>
+            <div style="padding:0 2rem 1.5rem;display:flex;gap:.75rem;justify-content:flex-end;">
+                <button type="button" class="btn" data-bs-dismiss="modal"
+                        style="background:#f8f9fa;border:1.5px solid #dee2e6;border-radius:9px;font-weight:600;padding:.5rem 1.25rem;">
+                    Close
+                </button>
+                <a id="dupEditLink" href="#" class="btn"
+                   style="background:linear-gradient(135deg,#0d6efd,#0a58ca);color:#fff;border:none;border-radius:9px;font-weight:600;padding:.5rem 1.25rem;">
+                    &#9998; Edit Existing
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        (function () {
+            var form = document.querySelector('form[action*="Create"]');
+            form.addEventListener('submit', function (e) {
+                if (!$(form).valid()) return;
+                e.preventDefault();
+                var formData = new FormData(form);
+                $.ajax({
+                    url: form.action,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (resp) {
+                        if (resp && resp.isDuplicate) {
+                            var emp = resp.employee;
+                            var grades = { 1: 'Junior', 2: 'Middle', 3: 'Senior', 4: 'C-Level' };
+                            var html =
+                                '<div style="display:grid;grid-template-columns:auto 1fr;gap:.5rem .75rem;font-size:.9rem;">' +
+                                '<span style="font-weight:600;color:#495057;">&#128100; Name</span><span>' + $('<span>').text(emp.name).html() + '</span>' +
+                                '<span style="font-weight:600;color:#495057;">&#9993; Email</span><span>' + $('<span>').text(emp.email).html() + '</span>' +
+                                '<span style="font-weight:600;color:#495057;">&#128197; Age</span><span>' + emp.age + ' years</span>' +
+                                '<span style="font-weight:600;color:#495057;">&#128176; Salary</span><span>$' + Number(emp.salary).toLocaleString() + '</span>' +
+                                '<span style="font-weight:600;color:#495057;">&#128197; Duration</span><span>' + emp.durationWorked + ' months</span>' +
+                                '<span style="font-weight:600;color:#495057;">&#127942; Grade</span><span>' + (grades[emp.grade] || emp.grade) + '</span>' +
+                                '</div>';
+                            $('#dupDetails').html(html);
+                            $('#dupEditLink').attr('href', '/Employee/Edit/' + emp.id);
+                            new bootstrap.Modal(document.getElementById('duplicateModal')).show();
+                        } else {
+                            window.location.href = '@Url.Action("Index")';
+                        }
+                    }
+                });
+            });
+        })();
+    </script>
 }
 
