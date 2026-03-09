@@ -23,7 +23,6 @@ public class ManageController : Controller
     {
         ViewBag.StatusMessage = message switch
         {
-            ManageMessageId.ChangePasswordSuccess => "Your password has been changed.",
             ManageMessageId.SetPasswordSuccess => "Your password has been set.",
             ManageMessageId.Error => "An error has occurred.",
             _ => string.Empty
@@ -38,32 +37,6 @@ public class ManageController : Controller
             Email = user.Email,
             HasPassword = await _userManager.HasPasswordAsync(user)
         };
-        return View(model);
-    }
-
-    // GET: /Manage/ChangePassword
-    public IActionResult ChangePassword() => View();
-
-    // POST: /Manage/ChangePassword
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
-    {
-        if (!ModelState.IsValid) return View(model);
-
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null) return NotFound();
-
-        var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
-        if (result.Succeeded)
-        {
-            await _signInManager.RefreshSignInAsync(user);
-            return RedirectToAction(nameof(Index), new { Message = ManageMessageId.ChangePasswordSuccess });
-        }
-
-        foreach (var error in result.Errors)
-            ModelState.AddModelError(string.Empty, error.Description);
-
         return View(model);
     }
 
