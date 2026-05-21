@@ -55,10 +55,10 @@ public class EmployeeDetailsController : Controller
     private static double CalculatePFContribution(float salary, int durationMonths)
         => Math.Round(salary * 0.12 * durationMonths, 2);
 
-    /// <summary>Employer contribution: 12% salary PF + grade-based bonus allowance.</summary>
+    /// <summary>Employer contribution: 15% salary PF + grade-based bonus allowance.</summary>
     private static double CalculateEmployerContribution(float salary, int durationMonths, int grade)
     {
-        double pfContrib = salary * 0.12 * durationMonths;
+        double pfContrib = salary * 0.15 * durationMonths;
         double gradeBonus = grade * salary * 0.02; // 2% per grade level as bonus allowance
         return Math.Round(pfContrib + gradeBonus, 2);
     }
