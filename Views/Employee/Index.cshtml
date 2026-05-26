@@ -1,7 +1,7 @@
-@model IEnumerable<EAEmployee.Net8.Models.Employee>
+@model EAEmployee.Net8.Models.PaginatedList<EAEmployee.Net8.Models.Employee>
 @{
     ViewData["Title"] = "Employee List";
-    var total = Model.Count();
+    var total = Model.TotalCount;
 }
 
 <style>
@@ -30,17 +30,20 @@
         border-radius: 12px;
         padding: 1rem 1.25rem;
         margin-bottom: 1.25rem;
-        display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+        display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem;
         flex-wrap: wrap;
         box-shadow: 0 2px 8px rgba(0,0,0,.06);
     }
+    .search-filters { display: flex; align-items: flex-end; gap: .6rem; flex-wrap: wrap; }
+    .filter-group { display: flex; flex-direction: column; gap: .25rem; }
+    .filter-label { font-size: .75rem; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: .04em; }
     .search-input-wrap { display: flex; align-items: center; gap: .5rem; }
-    .search-input-wrap input {
+    .search-input-wrap input, .search-input-wrap select {
         border-radius: 8px; border: 1.5px solid #dee2e6;
         padding: .45rem 1rem; width: 230px; font-size: .9rem;
         transition: border-color .2s, box-shadow .2s;
     }
-    .search-input-wrap input:focus {
+    .search-input-wrap input:focus, .search-input-wrap select:focus {
         outline: none; border-color: #0d6efd;
         box-shadow: 0 0 0 3px rgba(13,110,253,.12);
     }
@@ -109,7 +112,24 @@
     }
     .empty-state .es-icon { font-size: 3rem; margin-bottom: .75rem; display: block; }
     .empty-state p { font-size: 1rem; }
-    .duration-cell { color: #6c757d; font-size: .88rem; }
+    .pagination-bar {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: .85rem 1.25rem; border-top: 1px solid #f0f0f0;
+        font-size: .85rem; color: #6c757d; flex-wrap: wrap; gap: .5rem;
+    }
+    .pagination-bar .page-info { font-weight: 500; }
+    .page-nav { display: flex; gap: .35rem; align-items: center; }
+    .page-btn {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 34px; height: 34px; border-radius: 7px;
+        border: 1.5px solid #dee2e6; background: #fff; color: #495057;
+        font-size: .85rem; font-weight: 600; text-decoration: none;
+        transition: all .15s; padding: 0 .6rem;
+    }
+    .page-btn:hover { background: #e9f0ff; border-color: #0d6efd; color: #0d6efd; }
+    .page-btn.active { background: #0d6efd; border-color: #0d6efd; color: #fff; pointer-events: none; }
+    .page-btn.disabled { opacity: .4; pointer-events: none; }
+
     .age-badge {
         display: inline-flex; align-items: center; gap: .35rem;
         padding: .3rem .75rem; border-radius: 20px;
@@ -160,13 +180,47 @@
     {
         <span></span>
     }
-    <div class="search-input-wrap">
-        <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" placeholder="&#128269; Search by name..." />
-        <button type="submit" class="btn-search">Search</button>
-        @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
-        {
-            <a asp-action="Index" style="font-size:.85rem; color:#6c757d; text-decoration:none;">&#10005; Clear</a>
-        }
+    <div class="search-filters">
+        <div class="filter-group">
+            <span class="filter-label">&#128100; Name</span>
+            <div class="search-input-wrap">
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Search by name..." />
+            </div>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">&#9993; Email</span>
+            <div class="search-input-wrap">
+                <input type="text" name="emailTerm" value="@ViewBag.EmailTerm" placeholder="Search by email..." />
+            </div>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">&#127775; Grade</span>
+            <div class="search-input-wrap">
+                @{ var gf = ViewBag.GradeFilter as int?; }
+                <select name="gradeFilter">
+                    @Html.Raw("<option value=\"\">All Grades</option>")
+                    @Html.Raw($"<option value=\"1\"{(gf == 1 ? " selected" : "")}>Junior</option>")
+                    @Html.Raw($"<option value=\"2\"{(gf == 2 ? " selected" : "")}>Middle</option>")
+                    @Html.Raw($"<option value=\"3\"{(gf == 3 ? " selected" : "")}>Senior</option>")
+                    @Html.Raw($"<option value=\"4\"{(gf == 4 ? " selected" : "")}>C-Level</option>")
+                </select>
+            </div>
+        </div>
+        <div class="filter-group" style="justify-content:flex-end;">
+            <span class="filter-label">&nbsp;</span>
+            <div class="search-input-wrap">
+                <button type="submit" class="btn-search">Search</button>
+                @{
+                    bool hasFilter = !string.IsNullOrEmpty(ViewBag.SearchTerm as string)
+                                  || !string.IsNullOrEmpty(ViewBag.EmailTerm as string)
+                                  || ViewBag.GradeFilter != null;
+                }
+                @if (hasFilter)
+                {
+                    <a asp-action="Index" style="font-size:.85rem; color:#6c757d; text-decoration:none;">&#10005; Clear</a>
+                }
+            </div>
+        </div>
     </div>
 </form>
 
@@ -174,12 +228,12 @@
     <table class="table table-borderless">
         <thead>
             <tr>
-                <th>@Html.DisplayNameFor(m => m.Name)</th>
-                <th>@Html.DisplayNameFor(m => m.Age)</th>
-                <th>@Html.DisplayNameFor(m => m.Salary)</th>
-                <th>@Html.DisplayNameFor(m => m.DurationWorked)</th>
-                <th>@Html.DisplayNameFor(m => m.Grade)</th>
-                <th>@Html.DisplayNameFor(m => m.Email)</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Salary</th>
+                <th>Duration Worked (months)</th>
+                <th>Grade</th>
+                <th>Email</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -233,4 +287,46 @@
             }
         </tbody>
     </table>
+
+    @if (Model.TotalPages > 1)
+    {
+        var search = ViewBag.SearchTerm as string;
+        var email = ViewBag.EmailTerm as string;
+        var grade = ViewBag.GradeFilter as int?;
+        var prevPage = Model.PageIndex - 1;
+        var nextPage = Model.PageIndex + 1;
+        var startItem = (Model.PageIndex - 1) * 5 + 1;
+        var endItem = Math.Min(Model.PageIndex * 5, Model.TotalCount);
+
+        <div class="pagination-bar">
+            <span class="page-info">
+                Showing @startItem–@endItem of @Model.TotalCount employees
+            </span>
+            <nav class="page-nav" aria-label="Employee list pages">
+                @if (Model.HasPreviousPage)
+                {
+                    <a class="page-btn" asp-action="Index" asp-route-page="@prevPage" asp-route-searchTerm="@search" asp-route-emailTerm="@email" asp-route-gradeFilter="@grade">&#8592; Prev</a>
+                }
+                else
+                {
+                    <span class="page-btn disabled">&#8592; Prev</span>
+                }
+
+                @for (int p = 1; p <= Model.TotalPages; p++)
+                {
+                    <a class="page-btn @(p == Model.PageIndex ? "active" : "")"
+                       asp-action="Index" asp-route-page="@p" asp-route-searchTerm="@search" asp-route-emailTerm="@email" asp-route-gradeFilter="@grade">@p</a>
+                }
+
+                @if (Model.HasNextPage)
+                {
+                    <a class="page-btn" asp-action="Index" asp-route-page="@nextPage" asp-route-searchTerm="@search" asp-route-emailTerm="@email" asp-route-gradeFilter="@grade">Next &#8594;</a>
+                }
+                else
+                {
+                    <span class="page-btn disabled">Next &#8594;</span>
+                }
+            </nav>
+        </div>
+    }
 </div>
