@@ -15,15 +15,27 @@ public class EmployeeController : Controller
         _db = db;
     }
 
+    private const int PageSize = 5;
+
     // GET: Employee
-    public async Task<IActionResult> Index(string? searchTerm)
+    public async Task<IActionResult> Index(string? searchTerm, string? emailTerm, int? gradeFilter, int page = 1)
     {
         var employees = _db.Employees.AsQueryable();
+
         if (!string.IsNullOrEmpty(searchTerm))
             employees = employees.Where(e => e.Name.StartsWith(searchTerm));
 
+        if (!string.IsNullOrEmpty(emailTerm))
+            employees = employees.Where(e => e.Email.Contains(emailTerm));
+
+        if (gradeFilter.HasValue)
+            employees = employees.Where(e => e.Grade == gradeFilter.Value);
+
         ViewBag.SearchTerm = searchTerm;
-        return View(await employees.ToListAsync());
+        ViewBag.EmailTerm = emailTerm;
+        ViewBag.GradeFilter = gradeFilter;
+        var paginatedList = await PaginatedList<Employee>.CreateAsync(employees, page, PageSize);
+        return View(paginatedList);
     }
 
     // GET: Employee/Create

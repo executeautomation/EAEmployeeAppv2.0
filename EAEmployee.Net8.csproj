@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <None Update="app.db" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <Compile Remove="EAEmployee.Tests/**" />
   </ItemGroup>
 
   <ItemGroup>
