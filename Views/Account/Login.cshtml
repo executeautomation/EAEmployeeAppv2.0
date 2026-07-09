@@ -177,6 +177,24 @@
 
         .forgot-link:hover { color: #1e3a5f; text-decoration: underline; }
 
+        /* Honeypot trap — visually hidden but NOT display:none so some bots still find it */
+        .bot-trap {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Google reCAPTCHA centering */
+        .recaptcha-wrap {
+            display: flex;
+            justify-content: center;
+        }
+
         .back-link {
             display: block;
             text-align: center;
@@ -209,6 +227,24 @@
                 <form asp-action="Login" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post" novalidate>
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-3" style="font-size:.82rem;border-radius:10px"></div>
 
+                    @* ── Bot-detection fields (invisible to human visitors) ─────────────
+                       Honeypot: positioned off-screen; automated clients that fill every
+                       field will trigger it. CaptchaToken / PageLoadTime are written only
+                       by the JavaScript below — raw HTTP POSTs will leave them empty. *@
+
+                    @* Honeypot field *@
+                    <div class="bot-trap" aria-hidden="true" tabindex="-1">
+                        <label for="Website">Website</label>
+                        <input asp-for="Website" id="Website" name="Website"
+                               type="text" autocomplete="off" tabindex="-1" />
+                    </div>
+
+                    @* JS challenge token — set to "ok" by the script below *@
+                    <input asp-for="CaptchaToken" id="CaptchaToken" type="hidden" value="" />
+
+                    @* Page-load Unix timestamp (ms) — used for timing check *@
+                    <input asp-for="PageLoadTime" id="PageLoadTime" type="hidden" value="" />
+
                     <div class="mb-3">
                         <label asp-for="UserName" class="form-label">User Name</label>
                         <div class="input-icon-wrap">
@@ -239,6 +275,11 @@
                         <label asp-for="RememberMe" class="form-label mb-0" style="font-size:.83rem;font-weight:400;color:#6b7280;cursor:pointer">Keep me signed in</label>
                     </div>
 
+                    @* ── Google reCAPTCHA v2 ──────────────────────────────────────────────── *@
+                    <div class="mb-4 recaptcha-wrap">
+                        <div class="g-recaptcha" data-sitekey="@ViewBag.RecaptchaSiteKey"></div>
+                    </div>
+
                     <button type="submit" class="btn btn-signin">Sign In</button>
                 </form>
             </div>
@@ -257,5 +298,13 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        // Bot-detection: set the JS challenge token and record page-load time.
+        (function () {
+            document.getElementById('CaptchaToken').value = 'ok';
+            document.getElementById('PageLoadTime').value = Date.now().toString();
+        })();
+    </script>
 </body>
 </html>

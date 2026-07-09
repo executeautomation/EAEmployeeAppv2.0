@@ -1,4 +1,5 @@
 using EAEmployee.Net8.Models;
+using EAEmployee.Net8.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +11,22 @@ public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly BotDetectionService _botDetection;
+    private readonly CaptchaService _captcha;
+    private readonly IConfiguration _configuration;
 
-    public AccountController(UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager)
+    public AccountController(
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        BotDetectionService botDetection,
+        CaptchaService captcha,
+        IConfiguration configuration)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _botDetection = botDetection;
+        _captcha = captcha;
+        _configuration = configuration;
     }
 
     // GET: /Account/Login
@@ -23,6 +34,7 @@ public class AccountController : Controller
     public IActionResult Login(string? returnUrl = null)
     {
         ViewBag.ReturnUrl = returnUrl;
+        ViewBag.RecaptchaSiteKey = _configuration["GoogleRecaptcha:SiteKey"];
         return View();
     }
 
@@ -33,7 +45,31 @@ public class AccountController : Controller
     public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
     {
         ViewBag.ReturnUrl = returnUrl;
+        ViewBag.RecaptchaSiteKey = _configuration["GoogleRecaptcha:SiteKey"];
+
         if (!ModelState.IsValid) return View(model);
+
+        // ── Google reCAPTCHA v2 validation ────────────────────────────────────
+        var recaptchaToken = Request.Form["g-recaptcha-response"].ToString();
+        if (!await _captcha.ValidateAsync(recaptchaToken))
+        {
+            ModelState.AddModelError(string.Empty, "Please complete the CAPTCHA verification.");
+            return View(model);
+        }
+
+        // ── Bot / automated-client detection ─────────────────────────────────
+        var botResult = _botDetection.Analyze(
+            HttpContext,
+            model.Website,
+            model.CaptchaToken,
+            model.PageLoadTime);
+
+        if (botResult.IsBot)
+        {
+            ModelState.AddModelError(string.Empty, botResult.Reason);
+            return View(model);
+        }
+        // ─────────────────────────────────────────────────────────────────────
 
         var result = await _signInManager.PasswordSignInAsync(
             model.UserName, model.Password, model.RememberMe, lockoutOnFailure: false);
@@ -43,6 +79,8 @@ public class AccountController : Controller
 
         if (result.IsLockedOut)
             return View("Lockout");
+
+        _botDetection.RecordFailedAttempt(HttpContext);
 
         ModelState.AddModelError(string.Empty, "Invalid login attempt.");
         return View(model);
@@ -65,7 +103,6 @@ public class AccountController : Controller
 
         if (result.Succeeded)
         {
-            // Assign default User role
             await _userManager.AddToRoleAsync(user, "User");
             await _signInManager.SignInAsync(user, isPersistent: false);
             return RedirectToAction("Index", "Home");
@@ -102,7 +139,6 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
-            // In a real application you would send an email here.
             return RedirectToAction(nameof(ForgotPasswordConfirmation));
         }
         return View(model);

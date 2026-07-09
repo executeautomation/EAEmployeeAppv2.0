@@ -168,7 +168,13 @@
         <p class="page-title">&#128101; Employees</p>
         <p class="page-subtitle">Manage your workforce records</p>
     </div>
-    <span class="stat-badge">&#128202; @total employee@(total != 1 ? "s" : "")</span>
+    <div style="display:flex;gap:.5rem;align-items:center;">
+        @if (User.IsInRole("Administrator"))
+        {
+            <a asp-action="ExportCsv" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-emailTerm="@ViewBag.EmailTerm" asp-route-gradeFilter="@ViewBag.GradeFilter" class="stat-badge" style="cursor:pointer;text-decoration:none;" title="Download filtered employees as CSV">&#128196; Export CSV</a>
+        }
+        <span class="stat-badge">&#128202; @total employee@(total != 1 ? "s" : "")</span>
+    </div>
 </div>
 
 <form method="get" class="search-card">

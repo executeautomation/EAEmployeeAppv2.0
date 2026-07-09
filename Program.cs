@@ -1,5 +1,7 @@
 using EAEmployee.Net8.Data;
 using EAEmployee.Net8.Models;
+using EAEmployee.Net8.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,6 +36,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddControllersWithViews();
+
+// Bot detection — IMemoryCache is used for IP-based rate limiting
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<BotDetectionService>();
+builder.Services.AddHttpClient<CaptchaService>();
+
+// Audit logging
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuditService, AuditService>();
 
 var app = builder.Build();
 

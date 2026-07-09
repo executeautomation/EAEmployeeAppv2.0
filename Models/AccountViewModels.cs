@@ -15,6 +15,16 @@ public class LoginViewModel
 
     [Display(Name = "Remember me?")]
     public bool RememberMe { get; set; }
+
+    // ── Bot-detection fields ──────────────────────────────────────────────────
+    // Honeypot: human visitors never see or fill this field (hidden via CSS).
+    public string? Website { get; set; }
+
+    // JavaScript challenge token: set to "ok" by the login page script.
+    public string? CaptchaToken { get; set; }
+
+    // Unix timestamp (ms) at which the page finished loading, written by JS.
+    public string? PageLoadTime { get; set; }
 }
 
 public class RegisterViewModel
