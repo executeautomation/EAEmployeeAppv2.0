@@ -81,6 +81,12 @@
                                 <a class="nav-link nav-pill" asp-controller="EmployeeDetails" asp-action="Index">&#128200; Details</a>
                             </li>
                         }
+                        @if (User.IsInRole("Administrator"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="AuditLog" asp-action="Index">&#128270; Audit Log</a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="About">&#8505;&#65039; About</a>
                         </li>

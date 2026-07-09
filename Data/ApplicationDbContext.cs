@@ -12,4 +12,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     }
 
     public DbSet<Employee> Employees { get; set; }
+
+    public DbSet<AuditLog> AuditLogs { get; set; }
 }

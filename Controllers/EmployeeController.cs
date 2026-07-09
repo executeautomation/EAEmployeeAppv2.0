@@ -1,5 +1,6 @@
 using EAEmployee.Net8.Data;
 using EAEmployee.Net8.Models;
+using EAEmployee.Net8.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +10,12 @@ namespace EAEmployee.Net8.Controllers;
 public class EmployeeController : Controller
 {
     private readonly ApplicationDbContext _db;
+    private readonly IAuditService _audit;
 
-    public EmployeeController(ApplicationDbContext db)
+    public EmployeeController(ApplicationDbContext db, IAuditService audit)
     {
         _db = db;
+        _audit = audit;
     }
 
     private const int PageSize = 5;
@@ -37,6 +40,46 @@ public class EmployeeController : Controller
         var paginatedList = await PaginatedList<Employee>.CreateAsync(employees, page, PageSize);
         return View(paginatedList);
     }
+
+    // GET: Employee/ExportCsv
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> ExportCsv(string? searchTerm, string? emailTerm, int? gradeFilter)
+    {
+        var employees = _db.Employees.AsQueryable();
+
+        if (!string.IsNullOrEmpty(searchTerm))
+            employees = employees.Where(e => e.Name.StartsWith(searchTerm));
+
+        if (!string.IsNullOrEmpty(emailTerm))
+            employees = employees.Where(e => e.Email.Contains(emailTerm));
+
+        if (gradeFilter.HasValue)
+            employees = employees.Where(e => e.Grade == gradeFilter.Value);
+
+        var list = await employees.OrderBy(e => e.Name).ToListAsync();
+
+        // Build CSV content
+        var csvLines = new List<string> { "Id,Name,Salary,Age,DurationWorked,Grade,Email" };
+        foreach (var e in list.OrderBy(x => x.Name))
+            csvLines.Add($"{e.Id},\"{e.Name}\",{e.Salary:F2},{e.Age},{e.DurationWorked},{GetGradeLabel(e.Grade)},\"{e.Email}\"");
+
+        var csvContent = string.Join("\r\n", csvLines);
+        var bytes = System.Text.Encoding.UTF8.GetBytes(csvContent);
+
+        // Audit the export action
+        await _audit.LogAsync("EmployeeExport", "ExportCsv", null, $"Exported {list.Count} employee(s) to CSV");
+
+        return File(bytes, "text/csv", $"employees_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv");
+    }
+
+    private static string GetGradeLabel(int grade) => grade switch
+    {
+        1 => "Junior",
+        2 => "Middle",
+        3 => "Senior",
+        4 => "C-Level",
+        _ => grade.ToString()
+    };
 
     // GET: Employee/Create
     [Authorize(Roles = "Administrator")]
@@ -72,6 +115,12 @@ public class EmployeeController : Controller
 
             _db.Employees.Add(employee);
             await _db.SaveChangesAsync();
+
+            // Audit log
+            await _audit.LogWithValuesAsync(
+                "Employee", "Create", employee.Id, null, new { employee.Name, employee.Email, employee.Salary, employee.Grade },
+                $"Created employee: {employee.Name}");
+
             return RedirectToAction(nameof(Index));
         }
         return View(employee);
@@ -94,10 +143,38 @@ public class EmployeeController : Controller
     {
         if (id != employee.Id) return NotFound();
 
+        var original = await _db.Employees.FindAsync(id);
+        if (original == null) return NotFound();
+
         if (ModelState.IsValid)
         {
-            _db.Entry(employee).State = EntityState.Modified;
+            // Capture old values before saving
+            var oldValues = new
+            {
+                Name = original.Name,
+                Salary = original.Salary,
+                Age = original.Age,
+                DurationWorked = original.DurationWorked,
+                Grade = original.Grade,
+                Email = original.Email
+            };
+
+            // Update the tracked entity's properties instead of attaching a new instance
+            original.Name = employee.Name;
+            original.Salary = employee.Salary;
+            original.Age = employee.Age;
+            original.DurationWorked = employee.DurationWorked;
+            original.Grade = employee.Grade;
+            original.Email = employee.Email;
+
             await _db.SaveChangesAsync();
+
+            // Audit log with old/new values
+            var newValues = new { original.Name, original.Email, original.Salary, original.Grade };
+            await _audit.LogWithValuesAsync(
+                "Employee", "Update", id, oldValues, newValues,
+                $"Updated employee: {original.Name}");
+
             return RedirectToAction(nameof(Index));
         }
         return View(employee);
@@ -121,6 +198,11 @@ public class EmployeeController : Controller
         var employee = await _db.Employees.FindAsync(id);
         if (employee != null)
         {
+            // Audit before deleting
+            await _audit.LogWithValuesAsync(
+                "Employee", "Delete", id, new { employee.Name, employee.Email, employee.Salary }, null,
+                $"Deleted employee: {employee.Name}");
+
             _db.Employees.Remove(employee);
             await _db.SaveChangesAsync();
         }

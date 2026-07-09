@@ -3,25 +3,45 @@
     ViewData["Title"] = "Manage Account";
 }
 
-<h2>@ViewData["Title"]</h2>
-
-@if (!string.IsNullOrEmpty(ViewBag.StatusMessage as string))
-{
-    <div class="alert alert-success">@ViewBag.StatusMessage</div>
-}
-
-<hr />
-<dl class="row">
-    <dt class="col-sm-3">Username</dt>
-    <dd class="col-sm-9">@Model.UserName</dd>
-
-    <dt class="col-sm-3">Email</dt>
-    <dd class="col-sm-9">@Model.Email</dd>
-</dl>
-
-<div class="mt-3">
-    @if (!Model.HasPassword)
-    {
-        <a asp-action="SetPassword" class="btn btn-outline-primary">Set Password</a>
+<style>
+    .account-card {
+        background: #fff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,.08);
+        padding: 2rem; max-width: 500px; border: 1px solid #eee;
     }
+    .account-card h2 { font-weight: 700; color: #1a1a2e; margin-bottom: .25rem; }
+    .info-row { display: flex; padding: .6rem 0; border-bottom: 1px solid #f0f0f0; }
+    .info-label { font-weight: 600; color: #495057; min-width: 80px; font-size: .9rem; }
+    .info-value { color: #212529; font-size: .9rem; }
+    .btn-group-custom { display: flex; gap: .5rem; margin-top: 1.5rem; flex-wrap: wrap; }
+</style>
+
+<div class="account-card">
+    <h2>@ViewData["Title"]</h2>
+
+    @if (!string.IsNullOrEmpty(ViewBag.StatusMessage as string))
+    {
+        <div class="alert alert-success mt-3">@ViewBag.StatusMessage</div>
+    }
+
+    <div class="mt-4">
+        <div class="info-row">
+            <span class="info-label">Username</span>
+            <span class="info-value">@Model.UserName</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Email</span>
+            <span class="info-value">@Model.Email</span>
+        </div>
+    </div>
+
+    <div class="btn-group-custom">
+        @if (!Model.HasPassword)
+        {
+            <a asp-action="SetPassword" class="btn btn-outline-primary">Set Password</a>
+        }
+        else
+        {
+            <a asp-action="ChangePassword" class="btn btn-outline-warning">Change Password</a>
+        }
+    </div>
 </div>

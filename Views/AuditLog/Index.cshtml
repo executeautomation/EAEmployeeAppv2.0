@@ -1,0 +1,135 @@
+@model EAEmployee.Net8.Models.PaginatedList<EAEmployee.Net8.Models.AuditLog>
+@{
+    ViewData["Title"] = "Audit Log";
+}
+
+<style>
+    .page-header-bar {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+        border-radius: 14px; padding: 1.5rem 2rem; margin-bottom: 1.5rem;
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .page-header-bar .page-title { color: #fff; font-size: 1.5rem; font-weight: 700; margin: 0; }
+    .filter-card { background: #fff; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,.06); display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .log-table-card { background: #fff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,.08); overflow: hidden; border: 1px solid #eee; }
+    .log-table-card table { margin: 0; font-size: .85rem; }
+    .log-table-card thead th { background: #f8f9fa; color: #495057; font-weight: 700; text-transform: uppercase; font-size: .72rem; letter-spacing: .05em; border-bottom: 2px solid #e9ecef; padding: .85rem 1rem; }
+    .log-table-card tbody tr { transition: background .15s; }
+    .log-table-card tbody tr:hover { background: #f0f7ff; }
+    .log-table-card tbody td { padding: .75rem 1rem; vertical-align: middle; border-color: #f0f0f0; }
+    .action-badge { display: inline-block; padding: .2rem .6rem; border-radius: 6px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+    .action-create { background: #d1e7dd; color: #0a3622; }
+    .action-update { background: #fff3cd; color: #664d03; }
+    .action-delete { background: #f8d7da; color: #842029; }
+    .action-export { background: #cfe2ff; color: #084298; }
+    .user-pill { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .65rem; border-radius: 20px; font-size: .78rem; background: #f1f3f5; color: #495057; }
+    .timestamp { font-size: .8rem; color: #6c757d; white-space: nowrap; }
+    .summary-text { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pagination-bar { display: flex; align-items: center; justify-content: space-between; padding: .85rem 1.25rem; border-top: 1px solid #f0f0f0; font-size: .85rem; color: #6c757d; flex-wrap: wrap; gap: .5rem; }
+    .page-nav { display: flex; gap: .35rem; align-items: center; }
+    .page-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 34px; border-radius: 7px; border: 1.5px solid #dee2e6; background: #fff; color: #495057; font-size: .85rem; font-weight: 600; text-decoration: none; transition: all .15s; padding: 0 .6rem; }
+    .page-btn:hover { background: #e9f0ff; border-color: #0d6efd; color: #0d6efd; }
+    .page-btn.active { background: #0d6efd; border-color: #0d6efd; color: #fff; pointer-events: none; }
+    .page-btn.disabled { opacity: .4; pointer-events: none; }
+</style>
+
+<div class="page-header-bar">
+    <div>
+        <p class="page-title">&#128270; Audit Log</p>
+        <p class="page-subtitle">Track all employee record changes</p>
+    </div>
+    <span class="stat-badge" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:.4rem 1rem;font-size:.85rem;font-weight:600;">@Model.TotalCount total entries</span>
+</div>
+
+<div class="filter-card">
+    <form method="get" style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;width:100%;">
+        <label style="font-size:.82rem;font-weight:600;color:#6c757d;">Entity:</label>
+        @{ var ef = ViewBag.EntityTypeFilter as int?; }
+        <select name="entityTypeFilter" onchange="this.form.submit()" style="border-radius:8px;border:1.5px solid #dee2e6;padding:.4rem .75rem;font-size:.85rem;">
+            @Html.Raw("<option value=\"\">All Entities</option>")
+            @Html.Raw($"<option value=\"1\"{(ef == 1 ? " selected" : "")}>Employee</option>")
+        </select>
+    </form>
+</div>
+
+<div class="log-table-card">
+    <table class="table table-borderless">
+        <thead>
+            <tr>
+                <th style="width:80px;">#</th>
+                <th>Action</th>
+                <th>Entity</th>
+                <th>User</th>
+                <th>Summary</th>
+                <th>Timestamp</th>
+                <th>IP Address</th>
+                <th style="width:80px;">Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr><td colspan="8" style="text-align:center;padding:3rem;color:#adb5bd;"><span style="font-size:2rem;display:block;margin-bottom:.5rem;">&#128203;</span>No audit entries yet.</td></tr>
+            }
+            else
+            {
+                foreach (var log in Model)
+                {
+                    var actionClass = log.Action switch
+                    {
+                        "Create" => "action-create",
+                        "Update" => "action-update",
+                        "Delete" => "action-delete",
+                        _ => "action-export"
+                    };
+
+                    <tr>
+                        <td style="color:#adb5bd;font-size:.8rem;">@log.Id</td>
+                        <td><span class="action-badge @actionClass">@log.Action</span></td>
+                        <td>@log.EntityType</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(log.UserName))
+                            {
+                                <span class="user-pill">&#128100; @log.UserName</span>
+                            }
+                            else
+                            {
+                                <span style="color:#adb5bd;font-size:.8rem;">System</span>
+                            }
+                        </td>
+                        <td><span class="summary-text" title="@log.Summary">@log.Summary</span></td>
+                        <td><span class="timestamp">@log.Timestamp.ToString("MMM dd, yyyy HH:mm")</span></td>
+                        <td style="font-size:.8rem;color:#6c757d;">@log.IpAddress ?? "N/A"</td>
+                        <td><a asp-action="Details" asp-route-id="@log.Id" class="btn-detail" style="background:#e3f2fd;color:#1565c0;border:1px solid #90caf9;border-radius:6px;padding:.3rem .7rem;font-size:.8rem;font-weight:600;text-decoration:none;">View</a></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    @if (Model.TotalPages > 1)
+    {
+        var ef = ViewBag.EntityTypeFilter as int?;
+        <div class="pagination-bar">
+            <span style="font-weight:500;">Showing @(Math.Min((Model.PageIndex - 1) * 20 + 1, Model.TotalCount))–@(Math.Min(Model.PageIndex * 20, Model.TotalCount)) of @Model.TotalCount</span>
+            <nav class="page-nav" aria-label="Audit log pages">
+                @if (Model.HasPreviousPage)
+                {
+                    <a class="page-btn" asp-action="Index" asp-route-page="@Model.PageIndex - 1" asp-route-entityTypeFilter="@ef">&#8592; Prev</a>
+                }
+                else { <span class="page-btn disabled">&#8592; Prev</span> }
+
+                @for (int p = Math.Max(1, Model.PageIndex - 2); p <= Math.Min(Model.TotalPages, Model.PageIndex + 2); p++)
+                {
+                    <a class="page-btn @(p == Model.PageIndex ? "active" : "")" asp-action="Index" asp-route-page="@p" asp-route-entityTypeFilter="@ef">@p</a>
+                }
+
+                @if (Model.HasNextPage)
+                {
+                    <a class="page-btn" asp-action="Index" asp-route-page="@Model.PageIndex + 1" asp-route-entityTypeFilter="@ef">Next &#8594;</a>
+                }
+                else { <span class="page-btn disabled">Next &#8594;</span> }
+            </nav>
+        </div>
+    }
+</div>
