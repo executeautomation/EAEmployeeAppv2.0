@@ -10,6 +10,7 @@
 |------|--------------|-----------------|
 | Dark gradient hero with EA logo | Shadowed table with grade pills & search | Two-column card form with dropdown grade |
 
+
 ---
 
 ## Features
