@@ -27,7 +27,7 @@ jobs:
           HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST "$BEARQ_BASE_URL/tasks" \
             -H "Authorization: Bearer $BEARQ_API_KEY" \
             -H "Content-Type: application/json" \
-            -d '{"agent":"tester","mode":"run","functionalAreas":["Account Management","Employee Management","Informational"]}')
+            -d '{"agent":"tester","mode":"run","functionalAreas":["Account Management"]}')
 
           echo "HTTP status: $HTTP_STATUS"
           cat response.json
