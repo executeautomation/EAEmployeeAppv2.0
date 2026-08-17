@@ -50,12 +50,15 @@ jobs:
           set -uo pipefail
 
           run_task() {
-            curl -sN -H "Authorization: Bearer $BEARQ_API_KEY" \
+            local data
+            data=$(curl -sN -H "Authorization: Bearer $BEARQ_API_KEY" \
               "$BEARQ_BASE_URL/tasks/$1/stream" \
-            | awk -v id="$1" '
-              /^event: done$/ { getline; sub(/^data: /, ""); print id, $0; exit }
-            ' \
-            | jq -e --arg id "$1" '.testRunStatus == "passed"' >/dev/null
+            | awk '
+              /^event: done$/ { getline; sub(/^data: /, ""); print; exit }
+            ')
+
+            echo "task $1: $data" >&2
+            echo "$data" | jq -e '.testRunStatus == "passed"' >/dev/null
           }
 
           PIDS=()
