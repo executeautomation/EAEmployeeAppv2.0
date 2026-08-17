@@ -5,15 +5,6 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
-    inputs:
-      functional_area:
-        description: "Functional area to run (leave blank for all regression tests)"
-        required: false
-        default: ""
-      environment:
-        description: "BearQ environment name (leave blank for workspace default)"
-        required: false
-        default: ""
 
 jobs:
   bearq-tests:
@@ -27,27 +18,31 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Build request body based on inputs (functional area / environment optional)
-          AREA="${{ github.event.inputs.functional_area }}"
-          ENVIRONMENT="${{ github.event.inputs.environment }}"
+          if [[ -z "${BEARQ_API_KEY:-}" ]]; then
+            echo "::error::BEARQ_API_KEY is empty. Check that the repo secret is set (Settings > Secrets and variables > Actions) and that this workflow run is not a pull_request from a fork (forks never receive secrets)."
+            exit 1
+          fi
 
-          BODY=$(jq -n \
-            --arg area "$AREA" \
-            --arg env "$ENVIRONMENT" \
-            '{agent:"tester", mode:"run"}
-             + (if $area != "" then {functionalAreas: [$area]} else {} end)
-             + (if $env != "" then {environment: $env} else {} end)')
-
-          echo "Request body: $BODY"
-
-          RESPONSE=$(curl -sf -X POST "$BEARQ_BASE_URL/tasks" \
+          # Runs every regression test case in the workspace (doc's default example)
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST "$BEARQ_BASE_URL/tasks" \
             -H "Authorization: Bearer $BEARQ_API_KEY" \
             -H "Content-Type: application/json" \
-            -d "$BODY")
+            -d '{"agent":"tester","mode":"run"}')
 
-          echo "$RESPONSE" | jq -r '.taskIds[]' > task_ids.txt
-          echo "Created $(wc -l < task_ids.txt) task(s)"
-          cat task_ids.txt
+          echo "HTTP status: $HTTP_STATUS"
+          cat response.json
+
+          if [[ "$HTTP_STATUS" -lt 200 || "$HTTP_STATUS" -ge 300 ]]; then
+            echo "::error::BearQ API returned $HTTP_STATUS. See response body above (type/code fields identify the problem)."
+            exit 1
+          fi
+
+          IDS=$(jq -r '.taskIds[]' response.json)
+          echo "IDS<<EOF" >> "$GITHUB_ENV"
+          echo "$IDS" >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
+          echo "Created $(echo "$IDS" | wc -l) task(s)"
+          echo "$IDS"
 
       - name: Stream tasks and gate on result
         id: gate
@@ -55,59 +50,17 @@ jobs:
           set -uo pipefail
 
           run_task() {
-            local id="$1"
-            local out
-            out=$(curl -sN -H "Authorization: Bearer $BEARQ_API_KEY" \
-              "$BEARQ_BASE_URL/tasks/$id/stream" \
-              | awk '
-                /^event: done$/    { getline; sub(/^data: /, ""); print "DONE " $0; exit }
-                /^event: timeout$/ { getline; sub(/^data: /, ""); print "TIMEOUT " $0; exit }
-              ')
-
-            if [[ "$out" == TIMEOUT* ]]; then
-              echo "$id STREAM_TIMEOUT ${out#TIMEOUT }"
-              return 1
-            fi
-
-            local data="${out#DONE }"
-            local status
-            status=$(echo "$data" | jq -r '.testRunStatus // .status')
-            echo "$id $status $data"
-            [[ "$status" == "passed" || "$status" == "completed" ]]
+            curl -sN -H "Authorization: Bearer $BEARQ_API_KEY" \
+              "$BEARQ_BASE_URL/tasks/$1/stream" \
+            | awk -v id="$1" '
+              /^event: done$/ { getline; sub(/^data: /, ""); print id, $0; exit }
+            ' \
+            | jq -e --arg id "$1" '.testRunStatus == "passed"' >/dev/null
           }
 
+          PIDS=()
+          for ID in $IDS; do run_task "$ID" & PIDS+=($!); done
+
           FAILED=0
-          declare -a PIDS=()
-          declare -a IDS=()
-          mkdir -p results
-
-          while read -r ID; do
-            [[ -z "$ID" ]] && continue
-            run_task "$ID" > "results/$ID.txt" 2>&1 &
-            PIDS+=($!)
-            IDS+=("$ID")
-          done < task_ids.txt
-
-          for i in "${!PIDS[@]}"; do
-            if ! wait "${PIDS[$i]}"; then
-              FAILED=1
-            fi
-          done
-
-          echo "## BearQ Results" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Task ID | Status |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
-          for ID in "${IDS[@]}"; do
-            LINE=$(cat "results/$ID.txt" 2>/dev/null || echo "$ID unknown")
-            STATUS=$(echo "$LINE" | awk '{print $2}')
-            echo "| $ID | $STATUS |" >> "$GITHUB_STEP_SUMMARY"
-          done
-
+          for PID in "${PIDS[@]}"; do wait "$PID" || FAILED=1; done
           exit $FAILED
-
-      - name: Upload BearQ result logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: bearq-results
-          path: results/
