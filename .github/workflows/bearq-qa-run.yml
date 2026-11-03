@@ -1,0 +1,69 @@
+name: BearQ QA Run
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  bearq-tests:
+    runs-on: ubuntu-latest
+    env:
+      BEARQ_API_KEY: ${{ secrets.BEARQ_API_KEY }}
+      BEARQ_BASE_URL: https://api.bearq.smartbear.com
+    steps:
+      - name: Trigger BearQ tester run
+        id: trigger
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${BEARQ_API_KEY:-}" ]]; then
+            echo "::error::BEARQ_API_KEY is empty. Check that the repo secret is set (Settings > Secrets and variables > Actions) and that this workflow run is not a pull_request from a fork (forks never receive secrets)."
+            exit 1
+          fi
+
+          # Runs every regression test case in the workspace (doc's default example)
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST "$BEARQ_BASE_URL/tasks" \
+            -H "Authorization: Bearer $BEARQ_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"agent":"tester","mode":"run","functionalAreas":["Account Management","Employee Management","Informational"]}')
+
+          echo "HTTP status: $HTTP_STATUS"
+          cat response.json
+
+          if [[ "$HTTP_STATUS" -lt 200 || "$HTTP_STATUS" -ge 300 ]]; then
+            echo "::error::BearQ API returned $HTTP_STATUS. See response body above (type/code fields identify the problem)."
+            exit 1
+          fi
+
+          IDS=$(jq -r '.taskIds[]' response.json)
+          echo "IDS<<EOF" >> "$GITHUB_ENV"
+          echo "$IDS" >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
+          echo "Created $(echo "$IDS" | wc -l) task(s)"
+          echo "$IDS"
+
+      - name: Stream tasks and gate on result
+        id: gate
+        run: |
+          set -uo pipefail
+
+          run_task() {
+            local data
+            data=$(curl -sN -H "Authorization: Bearer $BEARQ_API_KEY" \
+              "$BEARQ_BASE_URL/tasks/$1/stream" \
+            | awk '
+              /^event: done$/ { getline; sub(/^data: /, ""); print; exit }
+            ')
+
+            echo "task $1: $data" >&2
+            echo "$data" | jq -e '.testRunStatus == "passed"' >/dev/null
+          }
+
+          PIDS=()
+          for ID in $IDS; do run_task "$ID" & PIDS+=($!); done
+
+          FAILED=0
+          for PID in "${PIDS[@]}"; do wait "$PID" || FAILED=1; done
+          exit $FAILED
