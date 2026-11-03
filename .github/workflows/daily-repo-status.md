@@ -42,6 +42,16 @@ engine:
     model_reasoning_effort = "high"
 model: MiniMax-M3.1-Flash
 
+excluded-env: [MINIMAX_API_KEY]
+sandbox:
+  agent: {model-fallback: false, token-steering: false}
+models:
+  providers:
+    openai:
+      models:
+        MiniMax-M3.1-Flash:
+          cost: {input: "0.00000015", output: "0.00000060", cache_read: "0.000000015"}
+          
 source: githubnext/agentics/workflows/repo-status.md@139fa09ef17cde4135e696ff8e7af09bc5ddfa6e
 ---
 
