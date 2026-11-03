@@ -32,7 +32,15 @@ safe-outputs:
     title-prefix: "[repo-status] "
     labels: [report, daily-status]
     close-older-issues: true
-engine: pi
+engine:
+  id: codex
+  env:
+    OPENAI_BASE_URL: https://api.minimax.io/v1
+    CODEX_API_KEY: ${{ secrets.MINIMAX_API_KEY }}
+    OPENAI_API_KEY: ${{ secrets.MINIMAX_API_KEY }}
+  config: |
+    model_reasoning_effort = "high"
+model: MiniMax-M3.1-Flash
 
 source: githubnext/agentics/workflows/repo-status.md@139fa09ef17cde4135e696ff8e7af09bc5ddfa6e
 ---
